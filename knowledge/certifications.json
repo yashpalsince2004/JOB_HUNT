@@ -1,0 +1,26 @@
+[
+  {
+    "title": "Google Cloud Professional Machine Learning Engineer",
+    "issuer": "Google Cloud",
+    "date": "In Progress / Candidate",
+    "credential_id": ""
+  },
+  {
+    "title": "TensorFlow Developer Professional Certificate",
+    "issuer": "DeepLearning.AI / Coursera",
+    "date": "Jun 2024",
+    "credential_id": "TF-1092837"
+  },
+  {
+    "title": "Flutter Mobile Application Developer",
+    "issuer": "Udacity",
+    "date": "Mar 2024",
+    "credential_id": "FLUT-87462"
+  },
+  {
+    "title": "Machine Learning Specialization",
+    "issuer": "Stanford Online / DeepLearning.AI",
+    "date": "Dec 2023",
+    "credential_id": "ML-298374"
+  }
+]

@@ -1,0 +1,17 @@
+[
+  {
+    "title": "Top 5% Rank - University Hackathon 2024",
+    "description": "Developed an AI-based automated medical diagnosis assistant using Flutter and local ONNX model deployment, outperforming 200+ teams.",
+    "date": "Feb 2024"
+  },
+  {
+    "title": "Open-Source Contributor",
+    "description": "Contributed to LangChain community integrations by merging 3+ pull requests optimizing parser interfaces and prompt templates.",
+    "date": "Aug 2024"
+  },
+  {
+    "title": "Academic Excellence Award",
+    "description": "Awarded semester honors for maintaining a CGPA of 9.2/10 in B.E. Computer Science (AI & ML) studies.",
+    "date": "2023, 2024"
+  }
+]

@@ -1,0 +1,66 @@
+name: Daily AI Job Hunt
+
+on:
+  schedule:
+    # Run daily at 02:30 UTC (08:00 AM IST)
+    - cron: '30 2 * * *'
+  workflow_dispatch:
+    # Allow manual runs
+
+jobs:
+  job-hunt:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+
+    - name: Install system dependencies for WeasyPrint
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y --no-install-recommends \
+          shared-mime-info \
+          libpango-1.0-0 \
+          libpangocairo-1.0-0 \
+          libgdk-pixbuf2.0-0 \
+          libglib2.0-0
+
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Create credentials directory
+      run: mkdir -p credentials
+
+    - name: Setup Google Sheets Service Account Credentials
+      run: |
+        echo "${{ secrets.GOOGLE_SHEETS_CREDS }}" > credentials/service_account.json
+      shell: bash
+
+    - name: Run Job Hunter Pipeline
+      env:
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GOOGLE_SHEETS_CRED_PATH: "./credentials/service_account.json"
+        GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
+        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        LOG_LEVEL: "INFO"
+      run: |
+        python main.py --mode=daily
+
+    - name: Upload Generated Application Assets
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: daily-job-hunt-applications-${{ github.run_id }}
+        path: |
+          resume/output/
+          reports/
+        retention-days: 7

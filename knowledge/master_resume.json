@@ -1,0 +1,97 @@
+{
+  "personal_info": {
+    "name": "Yash Pal",
+    "email": "2004yashpal@gmail.com",
+    "phone": "+91-9326259927",
+    "location": "Mumbai, India",
+    "github": "https://github.com/yashpal",
+    "linkedin": "https://linkedin.com/in/yashpal",
+    "website": "https://yashpal.me"
+  },
+  "summary": "B.E. Computer Science student specializing in AI & ML at the University of Mumbai. Enthusiastic AI/ML and Mobile Developer with hands-on experience building generative AI integrations, deep learning pipelines, and responsive cross-platform mobile apps. Proficient in Python, Dart, PyTorch, and Flutter. Passionate about automating workflows and designing scalable AI-driven solutions.",
+  "education": [
+    {
+      "institution": "University of Mumbai",
+      "degree": "Bachelor of Engineering (B.E.) in Computer Science (Artificial Intelligence & Machine Learning)",
+      "location": "Mumbai, India",
+      "date": "2022 - 2026 (Expected)",
+      "gpa": "9.2/10.0 CGPA"
+    }
+  ],
+  "experience": [
+    {
+      "company": "AI Research Lab, University of Mumbai",
+      "role": "AI Research Assistant",
+      "location": "Mumbai, India",
+      "date": "Jun 2024 - Present",
+      "description": [
+        "Developing and testing state-of-the-art NLP models for local language translation using PyTorch and Hugging Face Transformers.",
+        "Optimized inference speeds by 40% by implementing model quantization and fine-tuning lightweight distilBERT architectures.",
+        "Collaborated with professors to publish research on low-resource machine translation in regional languages."
+      ]
+    },
+    {
+      "company": "Tech Solutions Inc.",
+      "role": "Software Engineering Intern (Flutter & Mobile)",
+      "location": "Remote",
+      "date": "Jan 2024 - May 2024",
+      "description": [
+        "Built and deployed a cross-platform mobile application using Flutter and Dart with real-time Firebase backend integration.",
+        "Implemented secure user authentication, push notifications, and local offline caching using Hive, reducing load times by 25%.",
+        "Redesigned the application UI using Material Design 3 guidelines, resulting in a 15% increase in user retention."
+      ]
+    }
+  ],
+  "projects": [
+    {
+      "title": "AI-Powered Job Hunting Agent",
+      "role": "Lead Developer",
+      "date": "Jan 2025 - Present",
+      "description": [
+        "Architected an automated multi-agent pipeline using Python and Gemini 2.5 Flash API to search, filter, and score jobs.",
+        "Integrated Semantic Search using sentence-transformers to calculate ATS keyword matches against job descriptions.",
+        "Automated personalized resume and cover letter generation using Jinja2 and WeasyPrint PDF engines.",
+        "Developed a real-time Telegram notifier and automated workflow via GitHub Actions, reducing manual job hunting time by 95%."
+      ],
+      "technologies": ["Python", "Gemini API", "sentence-transformers", "WeasyPrint", "GitHub Actions", "Google Sheets API"]
+    },
+    {
+      "title": "GenAI-Enabled Mobile Assistant",
+      "role": "Creator",
+      "date": "Sep 2024 - Dec 2024",
+      "description": [
+        "Created an Android application using Flutter and Dart that integrates Gemini LLM for dynamic context-aware assistant features.",
+        "Developed custom vector search client on-device using local ChromaDB wrappers for fast retrieval-augmented generation (RAG).",
+        "Achieved fluid UI animations and custom themes, leveraging modern Flutter state management (Bloc/Cubit) and clean architecture."
+      ],
+      "technologies": ["Flutter", "Dart", "Gemini API", "ChromaDB", "Bloc", "Firebase"]
+    },
+    {
+      "title": "Deep Learning Object Detection System",
+      "role": "Developer",
+      "date": "Mar 2024 - May 2024",
+      "description": [
+        "Trained and evaluated a YOLOv8 model in PyTorch on a custom dataset of 10k images for industrial quality inspection.",
+        "Integrated the detection model with an API endpoint built using FastAPI and containerized the setup using Docker for easy deployment.",
+        "Optimized pipeline to run at 30+ FPS on standard CPU hardware using ONNX Runtime optimizations."
+      ],
+      "technologies": ["Python", "PyTorch", "YOLOv8", "FastAPI", "Docker", "ONNX"]
+    }
+  ],
+  "skills": {
+    "languages": ["Python", "Dart", "Kotlin", "Java", "SQL", "JavaScript", "HTML/CSS"],
+    "machine_learning": ["PyTorch", "TensorFlow", "Keras", "Scikit-Learn", "Hugging Face", "NLP", "Computer Vision", "ONNX"],
+    "generative_ai": ["Gemini API", "LangChain", "LLMs", "RAG", "Prompt Engineering", "Vector Databases (ChromaDB, Pinecone)"],
+    "mobile_development": ["Flutter", "Dart", "Android SDK", "Jetpack Compose", "Firebase (Auth, Firestore, Cloud Functions)"],
+    "developer_tools": ["Git", "GitHub Actions", "Docker", "FastAPI", "Flask", "MongoDB", "Linux/Bash", "Google Cloud Platform"]
+  },
+  "certifications": [
+    "Google Cloud Professional Machine Learning Engineer (Candidate)",
+    "DeepLearning.AI TensorFlow Developer Specialization",
+    "Flutter Mobile Application Developer (Udacity)"
+  ],
+  "achievements": [
+    "Ranked in top 5% in University of Mumbai Hackathon 2024 for developing an AI-based automated medical diagnosis assistant.",
+    "Contributed to open-source Generative AI repositories, landing PRs in LangChain community integrations."
+  ]
+}

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ personal_info.name }} - Resume</title>
+    <link rel="stylesheet" href="resume_styles.css">
+</head>
+<body>
+    <div class="resume-container">
+        <!-- Header Section -->
+        <header class="header">
+            <h1>{{ personal_info.name }}</h1>
+            <div class="contact-info">
+                <span>{{ personal_info.location }}</span> │
+                <span>{{ personal_info.phone }}</span> │
+                <a href="mailto:{{ personal_info.email }}">{{ personal_info.email }}</a>
+            </div>
+            <div class="links">
+                {% if personal_info.github %}
+                <a href="{{ personal_info.github }}">GitHub</a>
+                {% endif %}
+                {% if personal_info.linkedin %}
+                │ <a href="{{ personal_info.linkedin }}">LinkedIn</a>
+                {% endif %}
+                {% if personal_info.website %}
+                │ <a href="{{ personal_info.website }}">Portfolio</a>
+                {% endif %}
+            </div>
+        </header>
+
+        <!-- Summary Section -->
+        {% if summary %}
+        <section class="section">
+            <h2>Professional Summary</h2>
+            <div class="section-content">
+                <p>{{ summary }}</p>
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- Skills Section -->
+        {% if skills %}
+        <section class="section">
+            <h2>Technical Skills</h2>
+            <div class="section-content skills-section">
+                {% if skills is mapping %}
+                    {% for category, items in skills.items() %}
+                    <p><strong>{{ category|replace('_', ' ')|title }}:</strong> {{ items|join(', ') }}</p>
+                    {% endfor %}
+                {% else %}
+                    <p>{{ skills|join(', ') }}</p>
+                {% endif %}
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- Experience Section -->
+        {% if experience %}
+        <section class="section">
+            <h2>Professional Experience</h2>
+            <div class="section-content">
+                {% for exp in experience %}
+                <div class="item">
+                    <div class="item-header">
+                        <span class="title"><strong>{{ exp.role }}</strong></span>
+                        <span class="date">{{ exp.date }}</span>
+                    </div>
+                    <div class="item-subheader">
+                        <span class="org">{{ exp.company }}</span>
+                        <span class="loc">{{ exp.location }}</span>
+                    </div>
+                    <ul class="bullet-points">
+                        {% for desc in exp.description %}
+                        <li>{{ desc }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- Projects Section -->
+        {% if projects %}
+        <section class="section">
+            <h2>Key Projects</h2>
+            <div class="section-content">
+                {% for proj in projects %}
+                <div class="item">
+                    <div class="item-header">
+                        <span class="title"><strong>{{ proj.title }}</strong> {% if proj.role %}— {{ proj.role }}{% endif %}</span>
+                        <span class="date">{{ proj.date }}</span>
+                    </div>
+                    {% if proj.technologies %}
+                    <div class="tech-stack">
+                        <strong>Technologies:</strong> {{ proj.technologies|join(', ') }}
+                    </div>
+                    {% endif %}
+                    <ul class="bullet-points">
+                        {% for desc in proj.description %}
+                        <li>{{ desc }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- Education Section -->
+        {% if education %}
+        <section class="section">
+            <h2>Education</h2>
+            <div class="section-content">
+                {% for edu in education %}
+                <div class="item">
+                    <div class="item-header">
+                        <span class="title"><strong>{{ edu.institution }}</strong></span>
+                        <span class="date">{{ edu.date }}</span>
+                    </div>
+                    <div class="item-subheader">
+                        <span class="org">{{ edu.degree }}</span>
+                        <span class="loc">{{ edu.location }}</span>
+                    </div>
+                    {% if edu.gpa %}
+                    <div class="gpa">
+                        <strong>GPA/Grade:</strong> {{ edu.gpa }}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- Certifications & Achievements Section -->
+        {% if certifications or achievements %}
+        <div class="two-column-row">
+            {% if certifications %}
+            <div class="column">
+                <section class="section">
+                    <h2>Certifications</h2>
+                    <ul class="bullet-points compact">
+                        {% for cert in certifications %}
+                        <li>
+                            {% if cert is string %}
+                                {{ cert }}
+                            {% else %}
+                                {{ cert.title }} ({{ cert.issuer }})
+                            {% endif %}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </section>
+            </div>
+            {% endif %}
+
+            {% if achievements %}
+            <div class="column">
+                <section class="section">
+                    <h2>Key Achievements</h2>
+                    <ul class="bullet-points compact">
+                        {% for ach in achievements %}
+                        <li>
+                            {% if ach is string %}
+                                {{ ach }}
+                            {% else %}
+                                <strong>{{ ach.title }}:</strong> {{ ach.description }}
+                            {% endif %}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </section>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

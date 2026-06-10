@@ -1,0 +1,57 @@
+{
+  "languages": [
+    "Python",
+    "Dart",
+    "Kotlin",
+    "Java",
+    "SQL",
+    "JavaScript",
+    "TypeScript",
+    "HTML",
+    "CSS"
+  ],
+  "frameworks_and_libraries": [
+    "PyTorch",
+    "TensorFlow",
+    "Keras",
+    "Scikit-Learn",
+    "Hugging Face",
+    "LangChain",
+    "FastAPI",
+    "Flask",
+    "Flutter",
+    "React",
+    "Express.js"
+  ],
+  "concepts_and_methodologies": [
+    "Machine Learning",
+    "Deep Learning",
+    "Natural Language Processing (NLP)",
+    "Computer Vision (CV)",
+    "Generative AI",
+    "Large Language Models (LLMs)",
+    "Retrieval Augmented Generation (RAG)",
+    "Prompt Engineering",
+    "Model Fine-Tuning",
+    "Neural Networks",
+    "Object Detection"
+  ],
+  "databases_and_vector_stores": [
+    "PostgreSQL",
+    "MongoDB",
+    "Firebase Firestore",
+    "ChromaDB",
+    "Pinecone",
+    "SQLite",
+    "Hive"
+  ],
+  "devops_and_tools": [
+    "Git",
+    "Docker",
+    "GitHub Actions",
+    "Google Cloud Platform (GCP)",
+    "Linux / Bash",
+    "Android Studio",
+    "VS Code"
+  ]
+}

@@ -1,0 +1,38 @@
+# ─── HTTP & Scraping ───
+httpx[http2]>=0.27.0
+beautifulsoup4>=4.12.0
+lxml>=5.0.0
+playwright>=1.44.0
+
+# ─── Google Sheets ───
+gspread>=6.0.0
+google-auth>=2.29.0
+
+# ─── AI / LLM ───
+google-genai>=1.0.0
+sentence-transformers>=3.0.0
+
+# ─── Telegram ───
+python-telegram-bot>=21.0
+
+# ─── Resume / Document Generation ───
+weasyprint>=62.0
+python-docx>=1.1.0
+jinja2>=3.1.0
+
+# ─── Configuration & Validation ───
+pydantic>=2.7.0
+pydantic-settings>=2.3.0
+
+# ─── Retry Logic ───
+tenacity>=8.3.0
+
+# ─── Vector Database (Phase 4) ───
+chromadb>=0.5.0
+
+# ─── Testing ───
+pytest>=8.2.0
+pytest-asyncio>=0.23.0
+
+# ─── Utilities ───
+python-dotenv>=1.0.0

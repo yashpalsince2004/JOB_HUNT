@@ -1,0 +1,51 @@
+[
+  {
+    "title": "AI-Powered Job Hunting Agent",
+    "role": "Lead Developer",
+    "date": "Jan 2025 - Present",
+    "description": [
+      "Architected an automated multi-agent pipeline using Python and Gemini 2.5 Flash API to search, filter, and score jobs.",
+      "Integrated Semantic Search using sentence-transformers to calculate ATS keyword matches against job descriptions.",
+      "Automated personalized resume and cover letter generation using Jinja2 and WeasyPrint PDF engines.",
+      "Developed a real-time Telegram notifier and automated workflow via GitHub Actions, reducing manual job hunting time by 95%."
+    ],
+    "technologies": ["Python", "Gemini API", "sentence-transformers", "WeasyPrint", "GitHub Actions", "Google Sheets API"],
+    "category": "AI/ML"
+  },
+  {
+    "title": "GenAI-Enabled Mobile Assistant",
+    "role": "Creator",
+    "date": "Sep 2024 - Dec 2024",
+    "description": [
+      "Created an Android application using Flutter and Dart that integrates Gemini LLM for dynamic context-aware assistant features.",
+      "Developed custom vector search client on-device using local ChromaDB wrappers for fast retrieval-augmented generation (RAG).",
+      "Achieved fluid UI animations and custom themes, leveraging modern Flutter state management (Bloc/Cubit) and clean architecture."
+    ],
+    "technologies": ["Flutter", "Dart", "Gemini API", "ChromaDB", "Bloc", "Firebase"],
+    "category": "Mobile"
+  },
+  {
+    "title": "Deep Learning Object Detection System",
+    "role": "Developer",
+    "date": "Mar 2024 - May 2024",
+    "description": [
+      "Trained and evaluated a YOLOv8 model in PyTorch on a custom dataset of 10k images for industrial quality inspection.",
+      "Integrated the detection model with an API endpoint built using FastAPI and containerized the setup using Docker for easy deployment.",
+      "Optimized pipeline to run at 30+ FPS on standard CPU hardware using ONNX Runtime optimizations."
+    ],
+    "technologies": ["Python", "PyTorch", "YOLOv8", "FastAPI", "Docker", "ONNX"],
+    "category": "AI/ML"
+  },
+  {
+    "title": "Portfolio Website with Local RAG Chatbot",
+    "role": "Full-Stack Developer",
+    "date": "Jul 2024 - Aug 2024",
+    "description": [
+      "Built a modern responsive portfolio website using React, TailwindCSS, and FastAPI.",
+      "Embedded an interactive chatbot powered by a localized LLM with Retrieval-Augmented Generation (RAG) to answer questions about my skills and experience.",
+      "Deployed the backend service serverless on Vercel and optimized database lookups using Supabase pgvector."
+    ],
+    "technologies": ["React", "TailwindCSS", "FastAPI", "Supabase", "pgvector", "LLMs"],
+    "category": "Full-Stack"
+  }
+]
