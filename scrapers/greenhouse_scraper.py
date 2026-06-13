@@ -36,7 +36,7 @@ class GreenhouseScraper(BaseScraper):
         soup = BeautifulSoup(html_content, "lxml")
         return soup.get_text(separator="\n", strip=True)
 
-    def _scrape_company(self, company: CompanyConfig) -> list[JobListing]:
+    def _scrape_company(self, company: CompanyConfig, limit: int | None = None) -> list[JobListing]:
         """Scrape all jobs from a single Greenhouse board."""
         url = f"{_API_BASE}/{company.board_id}/jobs"
         params = {"content": "true"}
@@ -49,6 +49,8 @@ class GreenhouseScraper(BaseScraper):
 
         jobs = []
         for job_data in data.get("jobs", []):
+            if limit is not None and len(jobs) >= limit:
+                break
             try:
                 # Extract location
                 location = ""
@@ -82,7 +84,20 @@ class GreenhouseScraper(BaseScraper):
         all_jobs: list[JobListing] = []
 
         for company in self._companies:
-            jobs = self._scrape_company(company)
+            if self._max_jobs_limit is not None and len(all_jobs) >= self._max_jobs_limit:
+                break
+            rem_limit = None
+            if self._max_jobs_limit is not None:
+                rem_limit = self._max_jobs_limit - len(all_jobs)
+
+            # Respect company-specific limit if set
+            comp_limit = company.scraping_limit if getattr(company, 'scraping_limit', None) is not None else None
+            if comp_limit is not None:
+                limit_to_use = min(comp_limit, rem_limit) if rem_limit is not None else comp_limit
+            else:
+                limit_to_use = rem_limit
+
+            jobs = self._scrape_company(company, limit=limit_to_use)
             all_jobs.extend(jobs)
             self._polite_delay(0.5, 1.5)  # Be polite between companies
 

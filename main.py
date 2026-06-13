@@ -146,6 +146,12 @@ def run_pipeline(mode: str) -> None:
     logger.info(f"Summary of matched jobs:")
     for idx, job in enumerate(relevant_jobs, 1):
         logger.info(f"  {idx}. {job.company} - {job.title} ({job.location}) -> {job.url}")
+        # Send special Telegram alert for High Priority AI Jobs (job_score >= 85)
+        if job.job_score >= 85:
+            try:
+                notifier.send_premium_alert(job.to_dict())
+            except Exception as e:
+                logger.error(f"Failed to send high-priority Telegram alert: {e}")
 
     # Write matches to sheets if not dry-run
     if not is_dry_run and sheets_client:
@@ -167,6 +173,27 @@ def run_pipeline(mode: str) -> None:
         logger.info("No LLM client available. Ending pipeline.")
         if not is_dry_run and sheets_client:
             try:
+                # Store target Indian AI company jobs (without ATS score since LLM is missing)
+                target_indian_companies = ["quantiphi", "fractal", "tiger analytics", "tredence", "latentview", "mu sigma", "musigma", "nielseniq", "nielsen", "course5", "gramener", "exl"]
+                indian_ai_jobs = []
+                for job in relevant_jobs:
+                    comp_name = job.company.lower()
+                    if any(tic in comp_name for tic in target_indian_companies):
+                        indian_ai_jobs.append({
+                            "Company": job.company,
+                            "Role": job.title,
+                            "Location": job.location,
+                            "Experience": job.experience,
+                            "Job Score": job.job_score,
+                            "ATS Score": 0.0,
+                            "Posted Date": job.posted_date,
+                            "Apply URL": job.url,
+                            "Status": job.status
+                        })
+                if indian_ai_jobs:
+                    logger.info(f"Writing {len(indian_ai_jobs)} target Indian AI company jobs to AnalyticsCompanies sheet")
+                    sheets_client.add_analytics_company_jobs(indian_ai_jobs)
+
                 sheets_client.add_daily_summary(
                     jobs_scraped=len(scraped_jobs),
                     jobs_new=len(unique_jobs),
@@ -197,6 +224,31 @@ def run_pipeline(mode: str) -> None:
     ats_scorer = ATSScoringAgent()
     scored_jobs = ats_scorer.execute(analyzed_jobs)
 
+    # Write target Indian AI company jobs with computed ATS scores
+    if not is_dry_run and sheets_client:
+        try:
+            target_indian_companies = ["quantiphi", "fractal", "tiger analytics", "tredence", "latentview", "mu sigma", "musigma", "nielseniq", "nielsen", "course5", "gramener", "exl"]
+            indian_ai_jobs = []
+            for job in scored_jobs:
+                comp_name = job.get("company", "").lower()
+                if any(tic in comp_name for tic in target_indian_companies):
+                    indian_ai_jobs.append({
+                        "Company": job.get("company", ""),
+                        "Role": job.get("title", ""),
+                        "Location": job.get("location", ""),
+                        "Experience": job.get("experience", ""),
+                        "Job Score": job.get("job_score", 0.0),
+                        "ATS Score": job.get("ats_score", 0.0),
+                        "Posted Date": job.get("posted_date", ""),
+                        "Apply URL": job.get("url", ""),
+                        "Status": job.get("status", "new")
+                    })
+            if indian_ai_jobs:
+                logger.info(f"Writing {len(indian_ai_jobs)} target Indian AI company jobs to AnalyticsCompanies sheet")
+                sheets_client.add_analytics_company_jobs(indian_ai_jobs)
+        except Exception as e:
+            logger.error(f"Failed to write target Indian AI company jobs to Google Sheets: {e}")
+
     # Filter jobs above ATS threshold
     jobs_to_apply = []
     above_ats_count = 0
@@ -204,10 +256,20 @@ def run_pipeline(mode: str) -> None:
         if job.get("ats_score", 0) >= settings.min_ats_score:
             above_ats_count += 1
             jobs_to_apply.append(job)
+            logger.info(
+                f"Accepted:\n"
+                f"Title: {job.get('title')}\n"
+                f"Company: {job.get('company')}\n"
+                f"Role Category: {job.get('role_category')}\n"
+                f"Job Score: {job.get('job_score')}\n"
+                f"ATS Score: {job.get('ats_score')}"
+            )
         else:
             logger.info(
-                f"Skipping {job.get('company')} — {job.get('title')} "
-                f"(ATS Score: {job.get('ats_score')} < {settings.min_ats_score})"
+                f"Rejected:\n"
+                f"Title: {job.get('title')}\n"
+                f"Company: {job.get('company')}\n"
+                f"Reason: ATS"
             )
 
     # Limit to max daily applications

@@ -35,6 +35,9 @@ _SHEET_SCHEMAS = {
     "Jobs": [
         "job_id", "company", "title", "location", "url",
         "source", "posted_date", "scraped_at", "status",
+        "role_category", "job_score", "ats_score", "company_priority",
+        "experience", "salary", "skills", "employment_type", "remote_status",
+        "salary_min", "salary_max", "salary_currency", "salary_period",
     ],
     "Applications": [
         "job_id", "company", "title", "url", "ats_score",
@@ -50,6 +53,9 @@ _SHEET_SCHEMAS = {
     "Interviews": [
         "job_id", "company", "role", "stage",
         "scheduled_date", "prep_path", "result", "notes",
+    ],
+    "AnalyticsCompanies": [
+        "Company", "Role", "Location", "Experience", "Job Score", "ATS Score", "Posted Date", "Apply URL", "Status"
     ],
 }
 
@@ -145,6 +151,31 @@ class SheetsClient:
         rate_limiter.wait_sync("sheets")
         ws.append_rows(rows, value_input_option=ValueInputOption.raw)
         logger.info(f"Added {len(rows)} jobs to Jobs sheet")
+        return len(rows)
+
+    def add_analytics_company_jobs(self, jobs: list[dict[str, Any]]) -> int:
+        """
+        Append new job listings to the AnalyticsCompanies sheet.
+
+        Args:
+            jobs: List of job dicts matching the AnalyticsCompanies schema.
+
+        Returns:
+            Number of jobs added.
+        """
+        if not jobs:
+            return 0
+
+        ws = self._get_sheet("AnalyticsCompanies")
+        headers = _SHEET_SCHEMAS["AnalyticsCompanies"]
+        rows = []
+        for job in jobs:
+            row = [str(job.get(h, "")) for h in headers]
+            rows.append(row)
+
+        rate_limiter.wait_sync("sheets")
+        ws.append_rows(rows, value_input_option=ValueInputOption.raw)
+        logger.info(f"Added {len(rows)} jobs to AnalyticsCompanies sheet")
         return len(rows)
 
     def update_job_status(self, job_id: str, status: str) -> bool:

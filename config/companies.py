@@ -24,13 +24,14 @@ class CompanyConfig:
     board_id: str = ""  # Platform-specific identifier
     careers_url: str = ""  # Direct careers page URL (for custom/workday)
     search_keywords: tuple[str, ...] = ()  # Optional: filter keywords on the platform
+    scraping_limit: int | None = None
 
 
 # ─── Greenhouse Companies ───
 # API: https://api.greenhouse.io/v1/boards/{board_id}/jobs?content=true
 GREENHOUSE_COMPANIES = [
-    CompanyConfig(name="Stripe", platform="greenhouse", board_id="stripe"),
-    CompanyConfig(name="Airbnb", platform="greenhouse", board_id="airbnb"),
+    CompanyConfig(name="Stripe", platform="greenhouse", board_id="stripe", scraping_limit=5),
+    CompanyConfig(name="Airbnb", platform="greenhouse", board_id="airbnb", scraping_limit=5),
     CompanyConfig(name="Cloudflare", platform="greenhouse", board_id="cloudflare"),
     CompanyConfig(name="DoorDash", platform="greenhouse", board_id="doordash"),
     CompanyConfig(name="Notion", platform="greenhouse", board_id="notion"),
@@ -53,8 +54,8 @@ GREENHOUSE_COMPANIES = [
 # ─── Lever Companies ───
 # API: https://api.lever.co/v0/postings/{board_id}?mode=json
 LEVER_COMPANIES = [
-    CompanyConfig(name="Netflix", platform="lever", board_id="netflix"),
-    CompanyConfig(name="Spotify", platform="lever", board_id="spotify"),
+    CompanyConfig(name="Netflix", platform="lever", board_id="netflix", scraping_limit=5),
+    CompanyConfig(name="Spotify", platform="lever", board_id="spotify", scraping_limit=5),
     CompanyConfig(name="Shopify", platform="lever", board_id="shopify"),
     CompanyConfig(name="Twitch", platform="lever", board_id="twitch"),
     CompanyConfig(name="Confluent", platform="lever", board_id="confluent"),
@@ -68,13 +69,13 @@ LEVER_COMPANIES = [
 # ─── Ashby Companies ───
 # API: https://api.ashbyhq.com/posting-api/job-board/{board_id}
 ASHBY_COMPANIES = [
-    CompanyConfig(name="Ramp", platform="ashby", board_id="ramp"),
+    CompanyConfig(name="Ramp", platform="ashby", board_id="ramp", scraping_limit=5),
     CompanyConfig(name="Linear", platform="ashby", board_id="linear"),
-    CompanyConfig(name="Cursor", platform="ashby", board_id="cursor"),
-    CompanyConfig(name="Perplexity", platform="ashby", board_id="perplexity"),
+    CompanyConfig(name="Cursor", platform="ashby", board_id="cursor", scraping_limit=5),
+    CompanyConfig(name="Perplexity", platform="ashby", board_id="perplexity", scraping_limit=5),
     CompanyConfig(name="ElevenLabs", platform="ashby", board_id="elevenlabs"),
     CompanyConfig(name="Together AI", platform="ashby", board_id="togetherai"),
-    CompanyConfig(name="Mistral AI", platform="ashby", board_id="mistralai"),
+    CompanyConfig(name="Mistral AI", platform="ashby", board_id="mistralai", scraping_limit=5),
 ]
 
 # ─── SmartRecruiters Companies ───
@@ -111,6 +112,20 @@ WORKDAY_COMPANIES = [
         platform="workday",
         careers_url="https://www.pwc.in/careers.html",
         search_keywords=("AI", "Machine Learning"),
+    ),
+    CompanyConfig(
+        name="Quantiphi",
+        platform="workday",
+        board_id="Quantiphi_Careers",
+        careers_url="https://quantiphi.com/careers/",
+        search_keywords=("AI", "Machine Learning", "GenAI"),
+    ),
+    CompanyConfig(
+        name="Fractal",
+        platform="workday",
+        board_id="Fractal",
+        careers_url="https://fractal.ai/careers",
+        search_keywords=("AI", "Machine Learning", "GenAI"),
     ),
 ]
 
@@ -172,6 +187,20 @@ INDEED_SEARCH_QUERIES = [
     "NLP engineer entry level India remote",
     "deep learning engineer junior India",
     "computer vision engineer fresher India",
+    "TCS AI engineer India",
+    "Infosys AI ML developer India",
+    "Wipro machine learning India",
+    "Capgemini AI engineer India",
+    "Cognizant AI engineer India",
+    "LTIMindtree AI developer India",
+    "Persistent AI developer India",
+    "Deloitte AI analyst India",
+    "EY AI consultant India",
+    "KPMG AI ML India",
+    "PwC AI developer India",
+    "Quantiphi AI engineer India",
+    "Fractal Analytics AI developer India",
+    "Tiger Analytics ML engineer India",
 ]
 
 

@@ -27,7 +27,7 @@ class IndeedScraper(BaseScraper):
         super().__init__(**kwargs)
         self._queries = queries or INDEED_SEARCH_QUERIES
 
-    def _scrape_query(self, query: str) -> list[JobListing]:
+    def _scrape_query(self, query: str, limit: int | None = None) -> list[JobListing]:
         """Scrape jobs for a single query."""
         jobs: list[JobListing] = []
         encoded_query = urllib.parse.quote_plus(query)
@@ -50,6 +50,8 @@ class IndeedScraper(BaseScraper):
             cards = soup.select(".result")
 
         for card in cards:
+            if limit is not None and len(jobs) >= limit:
+                break
             try:
                 # Extract Title
                 title_elem = card.select_one("h2.jobTitle") or card.select_one("h2.title")
@@ -115,7 +117,12 @@ class IndeedScraper(BaseScraper):
         all_jobs: list[JobListing] = []
 
         for query in self._queries:
-            jobs = self._scrape_query(query)
+            if self._max_jobs_limit is not None and len(all_jobs) >= self._max_jobs_limit:
+                break
+            rem_limit = None
+            if self._max_jobs_limit is not None:
+                rem_limit = self._max_jobs_limit - len(all_jobs)
+            jobs = self._scrape_query(query, limit=rem_limit)
             all_jobs.extend(jobs)
             self._polite_delay(3.0, 6.0)  # Indeed requires a larger delay to avoid blocking
 

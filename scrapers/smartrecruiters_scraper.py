@@ -25,7 +25,7 @@ class SmartRecruitersScraper(BaseScraper):
         super().__init__(**kwargs)
         self._companies = companies or get_companies_by_platform("smartrecruiters")
 
-    def _scrape_company(self, company: CompanyConfig) -> list[JobListing]:
+    def _scrape_company(self, company: CompanyConfig, max_jobs: int | None = None) -> list[JobListing]:
         """Scrape all jobs from a single SmartRecruiters company."""
         all_jobs: list[JobListing] = []
         offset = 0
@@ -46,7 +46,25 @@ class SmartRecruitersScraper(BaseScraper):
                 break
 
             for posting in postings:
+                if max_jobs is not None and len(all_jobs) >= max_jobs:
+                    break
                 try:
+                    # Pre-filter by title to avoid making hundreds/thousands of detail requests
+                    title = posting.get("name", "")
+                    title_lower = title.lower()
+                    
+                    # 1. Exclude senior/lead/manager/etc. roles
+                    excluded = ["senior", "lead", "manager", "director", "principal", "head", "architect", "staff", "vp", "president", "sr.", "sr "]
+                    if any(x in title_lower for x in excluded):
+                        continue
+                        
+                    # 2. Match target keywords to keep it to technical/development roles
+                    targets = ["ai", "ml", "nlp", "flutter", "android", "machine", "learning", "vision", "data", "fresher", "developer", "engineer", "software", "programmer"]
+                    import re
+                    words = re.split(r"\W+", title_lower)
+                    if not any(kw in words or kw in title_lower for kw in targets):
+                        continue
+
                     # Extract location
                     location_data = posting.get("location", {})
                     location_parts = []
@@ -101,7 +119,7 @@ class SmartRecruitersScraper(BaseScraper):
             # Pagination
             total_found = data.get("totalFound", 0)
             offset += limit
-            if offset >= total_found:
+            if offset >= total_found or (max_jobs is not None and len(all_jobs) >= max_jobs):
                 break
             self._polite_delay(0.5, 1.0)
 
@@ -113,7 +131,20 @@ class SmartRecruitersScraper(BaseScraper):
         all_jobs: list[JobListing] = []
 
         for company in self._companies:
-            jobs = self._scrape_company(company)
+            if self._max_jobs_limit is not None and len(all_jobs) >= self._max_jobs_limit:
+                break
+            rem_limit = None
+            if self._max_jobs_limit is not None:
+                rem_limit = self._max_jobs_limit - len(all_jobs)
+
+            # Respect company-specific limit if set
+            comp_limit = company.scraping_limit if getattr(company, 'scraping_limit', None) is not None else None
+            if comp_limit is not None:
+                limit_to_use = min(comp_limit, rem_limit) if rem_limit is not None else comp_limit
+            else:
+                limit_to_use = rem_limit
+
+            jobs = self._scrape_company(company, max_jobs=limit_to_use)
             all_jobs.extend(jobs)
             self._polite_delay(1.0, 2.0)
 

@@ -30,20 +30,23 @@ class WorkdayScraper(BaseScraper):
             "deloitte": "deloitte.myworkdayjobs.com",
             "ey": "eygbl.myworkdayjobs.com",
             "pwc": "pwc.myworkdayjobs.com",
+            "quantiphi": "quantiphi.wd1.myworkdayjobs.com",
+            "fractal": "fractal.myworkdayjobs.com",
         }
         return mapping.get(company_name.lower(), f"{company_name.lower()}.myworkdayjobs.com")
 
-    def _scrape_company(self, company: CompanyConfig) -> list[JobListing]:
+    def _scrape_company(self, company: CompanyConfig, limit: int | None = None) -> list[JobListing]:
         """Scrape jobs from a single Workday tenant."""
         subdomain = self._get_workday_subdomain(company.name)
+        tenant = company.board_id if company.board_id else company.name.lower()
         # Standard Workday search endpoint
-        url = f"https://{subdomain}/wday/cxs/{company.name.lower()}/Careers/jobs"
+        url = f"https://{subdomain}/wday/cxs/{tenant}/Careers/jobs"
         
         # Fallback patterns for tenant paths
         tenant_paths = [
-            f"https://{subdomain}/wday/cxs/{company.name.lower()}/Careers/jobs",
-            f"https://{subdomain}/wday/cxs/{company.name.lower()}/External/jobs",
-            f"https://{subdomain}/wday/cxs/{company.name.lower()}/External_Career/jobs",
+            f"https://{subdomain}/wday/cxs/{tenant}/Careers/jobs",
+            f"https://{subdomain}/wday/cxs/{tenant}/External/jobs",
+            f"https://{subdomain}/wday/cxs/{tenant}/External_Career/jobs",
         ]
 
         # Use search keywords configured for the company
@@ -53,6 +56,8 @@ class WorkdayScraper(BaseScraper):
         client = self._get_client()
 
         for search_text in keywords:
+            if limit is not None and len(jobs) >= limit:
+                break
             logger.info(f"[Workday] Searching {company.name} for: {search_text}")
             payload = {
                 "appliedFacets": {},
@@ -79,6 +84,8 @@ class WorkdayScraper(BaseScraper):
                         success = True
                         
                         for job_data in data.get("jobPostings", []):
+                            if limit is not None and len(jobs) >= limit:
+                                break
                             try:
                                 title = job_data.get("title", "")
                                 path = job_data.get("externalPath", "")
@@ -116,7 +123,20 @@ class WorkdayScraper(BaseScraper):
         all_jobs: list[JobListing] = []
 
         for company in self._companies:
-            jobs = self._scrape_company(company)
+            if self._max_jobs_limit is not None and len(all_jobs) >= self._max_jobs_limit:
+                break
+            rem_limit = None
+            if self._max_jobs_limit is not None:
+                rem_limit = self._max_jobs_limit - len(all_jobs)
+            
+            # Respect company-specific limit if set
+            comp_limit = company.scraping_limit if getattr(company, 'scraping_limit', None) is not None else None
+            if comp_limit is not None:
+                limit_to_use = min(comp_limit, rem_limit) if rem_limit is not None else comp_limit
+            else:
+                limit_to_use = rem_limit
+
+            jobs = self._scrape_company(company, limit=limit_to_use)
             all_jobs.extend(jobs)
             self._polite_delay(2.0, 4.0)
 

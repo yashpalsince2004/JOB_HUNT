@@ -1,97 +1,240 @@
 {
-  "personal_info": {
-    "name": "Yash Pal",
-    "email": "2004yashpal@gmail.com",
-    "phone": "+91-9326259927",
-    "location": "Mumbai, India",
-    "github": "https://github.com/yashpal",
-    "linkedin": "https://linkedin.com/in/yashpal",
-    "website": "https://yashpal.me"
-  },
-  "summary": "B.E. Computer Science student specializing in AI & ML at the University of Mumbai. Enthusiastic AI/ML and Mobile Developer with hands-on experience building generative AI integrations, deep learning pipelines, and responsive cross-platform mobile apps. Proficient in Python, Dart, PyTorch, and Flutter. Passionate about automating workflows and designing scalable AI-driven solutions.",
-  "education": [
-    {
-      "institution": "University of Mumbai",
-      "degree": "Bachelor of Engineering (B.E.) in Computer Science (Artificial Intelligence & Machine Learning)",
-      "location": "Mumbai, India",
-      "date": "2022 - 2026 (Expected)",
-      "gpa": "9.2/10.0 CGPA"
-    }
+"personal_info": {
+"name": "Yash Pal",
+"email": "2004yashpal@gmail.com",
+"phone": "+91-9326259927",
+"location": "Mumbai,India",
+"website": "https://yashpal.me",
+"linkedin": "https://www.linkedin.com/in/yash-pal-since2004/",
+"github": "https://github.com/yashpalsince2004"
+},
+
+"summary": "Final-year B.E. Computer Science (Artificial Intelligence & Machine Learning) student with hands-on experience in Generative AI, Machine Learning, Deep Learning, Flutter development, and AI-powered application development. Experienced in building multi-model AI assistants, mobile applications, TensorFlow-based deep learning projects, and SaaS platforms. Strong foundation in Python, TensorFlow, FastAPI, Firebase, Flutter, NLP, and modern AI development workflows.",
+
+"education": [
+{
+"institution": "University of Mumbai",
+"degree": "Bachelor of Engineering",
+"specialization": "Computer Science (Artificial Intelligence & Machine Learning)",
+"start_date": "2022",
+"end_date": "2026",
+"gpa": "7.5/10.0",
+"coursework": [
+"Artificial Intelligence",
+"Machine Learning",
+"Deep Learning",
+"Reinforcement Learning",
+"Data Structures",
+"Project Management"
+]
+}
+],
+
+"experience": [
+{
+"company": "Xemi Private Limited",
+"role": "Automation Engineering Intern",
+"location": "Mumbai, India",
+"start_date": "2026-03",
+"end_date": "2026-04",
+"description": [
+"Worked on automation testing projects and contributed to improving testing workflows.",
+"Performed software testing, bug identification, and report generation for application performance analysis.",
+"Gained hands-on experience with automation tools, debugging, and quality assurance practices."
+]
+},
+{
+"company": "Deloitte",
+"role": "Data Analytics Job Simulation (Forage)",
+"description": [
+"Completed Deloitte Job Simulation focused on data analysis and forensic technology.",
+"Created interactive data dashboards using Tableau."
+]
+}
+],
+
+"projects": [
+{
+"title": "MITRA-AI: AI Chatbot & Assistant Platform",
+"link":"https://github.com/MITRA0616/Mitra_bot.git",
+"category": "Generative AI",
+"description": [
+"Designed and built a production-grade agentic AI platform integrating 5 LLM providers (Claude, GPT-4, Gemini, DeepSeek, Kimi K2) with intelligent NLP-based routing implementing core agentic patterns: reasoning, planning, tool-use, and autonomous workflow execution.",
+"Architected a scalable Python/FastAPI backend with multi-agent orchestration, async request handling, and enterprise-style REST API design analogous to Azure AI Foundry's agent service architecture.",
+"Implemented MCP (Model Context Protocol) awareness and prompt engineering strategies to optimize context-aware, multi-turn LLM interactions across providers.",
+"Deployed on AWS with Git-based version control designed for responsible AI output with logging and performance monitoring across agent pipelines."
+],
+"technologies": [
+"Flutter",
+"Dart",
+"Python",
+"FastAPI",
+"Gemini API",
+"OpenAI API",
+"Claude API",
+"DeepSeek API",
+"REST APIs",
+"NLP",
+"MCP",
+"AWS",
+"Git",
+"Google Cloud Authentication"
+]
+ },
+
+
+{
+  "title": "BookMyTurf",
+  "link":"https://github.com/yashpalsince2004/BookMyTurf",
+  "category": "SaaS Application",
+  "description": [
+    "Developed a sports turf booking and management platform for players and turf owners.",
+    "Implemented real-time turf booking, slot management, and authentication features.",
+    "Integrated Firebase backend services for booking management and user data storage.",
+    "Designed a responsive and sports-oriented user experience."
   ],
-  "experience": [
-    {
-      "company": "AI Research Lab, University of Mumbai",
-      "role": "AI Research Assistant",
-      "location": "Mumbai, India",
-      "date": "Jun 2024 - Present",
-      "description": [
-        "Developing and testing state-of-the-art NLP models for local language translation using PyTorch and Hugging Face Transformers.",
-        "Optimized inference speeds by 40% by implementing model quantization and fine-tuning lightweight distilBERT architectures.",
-        "Collaborated with professors to publish research on low-resource machine translation in regional languages."
-      ]
-    },
-    {
-      "company": "Tech Solutions Inc.",
-      "role": "Software Engineering Intern (Flutter & Mobile)",
-      "location": "Remote",
-      "date": "Jan 2024 - May 2024",
-      "description": [
-        "Built and deployed a cross-platform mobile application using Flutter and Dart with real-time Firebase backend integration.",
-        "Implemented secure user authentication, push notifications, and local offline caching using Hive, reducing load times by 25%.",
-        "Redesigned the application UI using Material Design 3 guidelines, resulting in a 15% increase in user retention."
-      ]
-    }
-  ],
-  "projects": [
-    {
-      "title": "AI-Powered Job Hunting Agent",
-      "role": "Lead Developer",
-      "date": "Jan 2025 - Present",
-      "description": [
-        "Architected an automated multi-agent pipeline using Python and Gemini 2.5 Flash API to search, filter, and score jobs.",
-        "Integrated Semantic Search using sentence-transformers to calculate ATS keyword matches against job descriptions.",
-        "Automated personalized resume and cover letter generation using Jinja2 and WeasyPrint PDF engines.",
-        "Developed a real-time Telegram notifier and automated workflow via GitHub Actions, reducing manual job hunting time by 95%."
-      ],
-      "technologies": ["Python", "Gemini API", "sentence-transformers", "WeasyPrint", "GitHub Actions", "Google Sheets API"]
-    },
-    {
-      "title": "GenAI-Enabled Mobile Assistant",
-      "role": "Creator",
-      "date": "Sep 2024 - Dec 2024",
-      "description": [
-        "Created an Android application using Flutter and Dart that integrates Gemini LLM for dynamic context-aware assistant features.",
-        "Developed custom vector search client on-device using local ChromaDB wrappers for fast retrieval-augmented generation (RAG).",
-        "Achieved fluid UI animations and custom themes, leveraging modern Flutter state management (Bloc/Cubit) and clean architecture."
-      ],
-      "technologies": ["Flutter", "Dart", "Gemini API", "ChromaDB", "Bloc", "Firebase"]
-    },
-    {
-      "title": "Deep Learning Object Detection System",
-      "role": "Developer",
-      "date": "Mar 2024 - May 2024",
-      "description": [
-        "Trained and evaluated a YOLOv8 model in PyTorch on a custom dataset of 10k images for industrial quality inspection.",
-        "Integrated the detection model with an API endpoint built using FastAPI and containerized the setup using Docker for easy deployment.",
-        "Optimized pipeline to run at 30+ FPS on standard CPU hardware using ONNX Runtime optimizations."
-      ],
-      "technologies": ["Python", "PyTorch", "YOLOv8", "FastAPI", "Docker", "ONNX"]
-    }
-  ],
-  "skills": {
-    "languages": ["Python", "Dart", "Kotlin", "Java", "SQL", "JavaScript", "HTML/CSS"],
-    "machine_learning": ["PyTorch", "TensorFlow", "Keras", "Scikit-Learn", "Hugging Face", "NLP", "Computer Vision", "ONNX"],
-    "generative_ai": ["Gemini API", "LangChain", "LLMs", "RAG", "Prompt Engineering", "Vector Databases (ChromaDB, Pinecone)"],
-    "mobile_development": ["Flutter", "Dart", "Android SDK", "Jetpack Compose", "Firebase (Auth, Firestore, Cloud Functions)"],
-    "developer_tools": ["Git", "GitHub Actions", "Docker", "FastAPI", "Flask", "MongoDB", "Linux/Bash", "Google Cloud Platform"]
-  },
-  "certifications": [
-    "Google Cloud Professional Machine Learning Engineer (Candidate)",
-    "DeepLearning.AI TensorFlow Developer Specialization",
-    "Flutter Mobile Application Developer (Udacity)"
-  ],
-  "achievements": [
-    "Ranked in top 5% in University of Mumbai Hackathon 2024 for developing an AI-based automated medical diagnosis assistant.",
-    "Contributed to open-source Generative AI repositories, landing PRs in LangChain community integrations."
+  "technologies": [
+    "Flutter",
+    "Firebase",
+    "Cloud Firestore",
+    "Dart",
+    "REST APIs"
   ]
+},
+
+{
+  "title": "Generative Adversarial Networks (GANs) with TensorFlow",
+  "link":"https://github.com/yashpalsince2004/Generative-Adversarial-Networks-GANs-with-TensorFlow.git",
+  "category": "Deep Learning",
+  "description": [
+    "Developed and trained GAN models using TensorFlow for image generation tasks.",
+    "Implemented Generator and Discriminator architectures to understand adversarial learning concepts.",
+    "Built custom training loops and optimized training performance.",
+    "Generated synthetic images using deep learning techniques."
+  ],
+  "technologies": [
+    "TensorFlow",
+    "Python",
+    "Jupyter Notebook",
+    "Deep Learning"
+  ]
+},
+
+{
+  "title": "SRCNN Super-Resolution Implementation",
+  "link":"https://github.com/yashpalsince2004/Image-Super-Resolution.git",
+  "category": "Computer Vision",
+  "description": [
+    "Implemented a Super-Resolution Convolutional Neural Network (SRCNN) for image enhancement.",
+    "Applied TensorFlow and Keras to reconstruct high-resolution images from low-resolution inputs.",
+    "Used OpenCV for preprocessing, interpolation, and image enhancement workflows.",
+    "Evaluated performance using PSNR and visual comparison techniques."
+  ],
+  "technologies": [
+    "TensorFlow",
+    "Keras",
+    "OpenCV",
+    "Python",
+    "Computer Vision"
+  ]
+},
+
+{
+  "title": "CNN Implementations",
+  "link":"https://github.com/yashpalsince2004/CNN_For_ImageRecognition",
+  "category": "Deep Learning",
+  "description": [
+    "Built and tested CNN-based deep learning implementations using Python and TensorFlow.",
+    "Developed lightweight experimental models for understanding image classification workflows.",
+    "Explored model execution, training pipelines, and neural network concepts."
+  ],
+  "technologies": [
+    "Python",
+    "TensorFlow",
+    "Deep Learning"
+  ]
+}
+
+
+],
+
+"skills": {
+"programming_languages": [
+"Python",
+"Dart",
+"JavaScript",
+"HTML"
+],
+
+
+"artificial_intelligence": [
+  "Machine Learning",
+  "Deep Learning",
+  "TensorFlow",
+  "PyTorch",
+  "Natural Language Processing",
+  "Computer Vision",
+  "Prompt Engineering"
+],
+
+"generative_ai": [
+  "Large Language Models (LLMs)",
+  "Gemini API",
+  "OpenAI API",
+  "Claude API",
+  "Agentic Workflows",
+  "Google AI Studio"
+],
+
+"mobile_development": [
+  "Flutter",
+  "Firebase",
+  "Cloud Firestore"
+],
+
+"backend": [
+  "FastAPI",
+  "REST APIs"
+],
+
+"tools": [
+  "Git",
+  "GitHub",
+  "Linux",
+  "AWS",
+  "Claude Code",
+  "Agentic CLI"
+]
+
+
+},
+
+"research_publications": [
+{
+"title": "Multimodal Conversational AI System",
+"status": "Published Research Paper"
+}
+],
+
+"certifications": [
+"AI Fluency: Framework and Foundations - Anthropic",
+"Generative AI Studio - Google",
+"Microsoft Copilot: The Art of Prompt Writing - LinkedIn",
+"Career Essentials in GitHub Professional Certificate - LinkedIn",
+"Oracle Cloud Infrastructure AI Foundations - Oracle",
+"Career Essentials in Generative AI - Microsoft & LinkedIn",
+"Machine Learning Specialization - DeepLearning.AI",
+"AI For All - Skill India"
+],
+
+"target_roles": [
+"AI Engineer",
+"Machine Learning Engineer",
+"Generative AI Engineer",
+"LLM Engineer",
+"AI Application Developer",
+"Flutter Developer",
+"Android Developer",
+"Software Engineer"
+]
 }

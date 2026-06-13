@@ -1,0 +1,293 @@
+\documentclass[10pt, letterpaper]{article}
+
+% Packages:
+\usepackage[
+    ignoreheadfoot,
+    top=2 cm,
+    bottom=2 cm,
+    left=2 cm,
+    right=2 cm,
+    footskip=1.0 cm,
+]{geometry}
+\usepackage{titlesec}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage[dvipsnames]{xcolor}
+\definecolor{primaryColor}{RGB}{0, 79, 144}
+\usepackage{enumitem}
+\usepackage{etoolbox}
+\usepackage{amsmath}
+\usepackage{fontawesome}
+\usepackage[
+    pdftitle={Yash Pal's CV},
+    pdfauthor={Yash Pal},
+    pdfcreator={LaTeX with RenderCV},
+    colorlinks=true,
+    urlcolor=primaryColor
+]{hyperref}
+\usepackage[pscoord]{eso-pic}
+\usepackage{calc}
+\usepackage{bookmark}
+\usepackage{lastpage}
+\usepackage{changepage}
+\usepackage{paracol}
+\usepackage{ifthen}
+\usepackage{needspace}
+\usepackage{iftex}
+
+\ifPDFTeX
+    \input{glyphtounicode}
+    \pdfgentounicode=1
+    \usepackage[utf8]{inputenc}
+    \usepackage{lmodern}
+\fi
+
+\AtBeginEnvironment{adjustwidth}{\partopsep0pt}
+\pagestyle{empty}
+\setcounter{secnumdepth}{0}
+\setlength{\parindent}{0pt}
+\setlength{\topskip}{0pt}
+\setlength{\columnsep}{0cm}
+\makeatletter
+\let\ps@customFooterStyle\ps@plain
+\patchcmd{\ps@customFooterStyle}{\thepage}{
+    \color{gray}\textit{\small Yash Pal - Page \thepage{} of \pageref*{LastPage}}
+}{}{}
+\makeatother
+\pagestyle{customFooterStyle}
+
+\titleformat{\section}{\needspace{4\baselineskip}\bfseries\large}{}{0pt}{}[\vspace{1pt}\titlerule]
+
+\titlespacing{\section}{
+    -1pt
+}{
+    0.3 cm
+}{
+    0.2 cm
+}
+
+\renewcommand\labelitemi{$\circ$}
+\newenvironment{highlights}{
+    \begin{itemize}[
+        topsep=0.10 cm,
+        parsep=0.10 cm,
+        partopsep=0pt,
+        itemsep=0pt,
+        leftmargin=0.4 cm + 10pt
+    ]
+}{
+    \end{itemize}
+}
+
+\newenvironment{highlightsforbulletentries}{
+    \begin{itemize}[
+        topsep=0.10 cm,
+        parsep=0.10 cm,
+        partopsep=0pt,
+        itemsep=0pt,
+        leftmargin=10pt
+    ]
+}{
+    \end{itemize}
+}
+
+\newenvironment{onecolentry}{
+    \begin{adjustwidth}{
+        0.2 cm + 0.00001 cm
+    }{
+        0.2 cm + 0.00001 cm
+    }
+}{
+    \end{adjustwidth}
+}
+
+\newenvironment{twocolentry}[2][]{
+    \onecolentry
+    \def\secondColumn{#2}
+    \setcolumnwidth{\fill, 4.5 cm}
+    \begin{paracol}{2}
+}{
+    \switchcolumn \raggedleft \secondColumn
+    \end{paracol}
+    \endonecolentry
+}
+
+\newenvironment{header}{
+    \setlength{\topsep}{0pt}\par\kern\topsep\centering\linespread{1.5}
+}{
+    \par\kern\topsep
+}
+
+\newcommand{\placelastupdatedtext}{%
+  \AddToShipoutPictureFG*{%
+    \put(
+        \LenToUnit{\paperwidth-2 cm-0.2 cm+0.05cm},
+        \LenToUnit{\paperheight-1.0 cm}
+    ){\vtop{{\null}\makebox[0pt][c]{
+        \small\color{gray}\textit{}\hspace{\widthof{}}
+    }}}%
+  }%
+}%
+
+\let\hrefWithoutArrow\href
+\renewcommand{\href}[2]{\hrefWithoutArrow{#1}{\ifthenelse{\equal{#2}{}}{ }{#2 }\raisebox{.15ex}{\footnotesize \faExternalLink}}}
+
+
+\begin{document}
+    \newcommand{\AND}{\unskip
+        \cleaders\copy\ANDbox\hskip\wd\ANDbox
+        \ignorespaces
+    }
+    \newsavebox\ANDbox
+    \sbox\ANDbox{}
+
+    \placelastupdatedtext
+    \begin{header}
+        \textbf{\fontsize{24 pt}{24 pt}\selectfont << personal_info.name >>}
+
+        \vspace{0.3 cm}
+
+        \normalsize\mbox{{\color{black}\footnotesize\faMapMarker}\hspace*{0.13cm}<< personal_info.location >>}%
+        %- if personal_info.email -%\kern 0.25 cm\AND\kern 0.25 cm\mbox{\hrefWithoutArrow{mailto:<< personal_info.email >>}{\color{black}{\footnotesize\faEnvelope}\hspace*{0.13cm}<< personal_info.email >>}}%- endif -%
+        %- if personal_info.phone -%\kern 0.25 cm\AND\kern 0.25 cm\mbox{\hrefWithoutArrow{tel:<< personal_info.phone >>}{\color{black}{\footnotesize\faPhone}\hspace*{0.13cm}<< personal_info.phone >>}}%- endif -%
+        %- if personal_info.website -%\kern 0.25 cm\AND\kern 0.25 cm\mbox{\hrefWithoutArrow{<< personal_info.website >>}{\color{black}{\footnotesize\faLink}\hspace*{0.13cm}<< personal_info.website | replace('https://', '') | replace('http://', '') | replace('www.', '') >>}}%- endif -%
+        %- if personal_info.linkedin -%\kern 0.25 cm\AND\kern 0.25 cm\mbox{\hrefWithoutArrow{<< personal_info.linkedin >>}{\color{black}{\footnotesize\faLinkedin}\hspace*{0.13cm}LinkedIn}}%- endif -%
+        %- if personal_info.github -%\kern 0.25 cm\AND\kern 0.25 cm\mbox{\hrefWithoutArrow{<< personal_info.github >>}{\color{black}{\footnotesize\faGithub}\hspace*{0.13cm}GitHub}}%- endif -%
+    \end{header}
+
+    \vspace{0.3 cm - 0.3 cm}
+
+
+    \section{Profile}
+        \begin{onecolentry}
+            << summary >>
+        \end{onecolentry}
+
+        \vspace{0.2 cm}
+
+
+    \section{Skills}
+        %- if skills.programming_languages -%
+        \begin{onecolentry}
+            \textbf{Languages:} << skills.programming_languages | join(', ') >>
+        \end{onecolentry}
+        \vspace{0.2 cm}
+        %- endif -%
+        %- if skills.artificial_intelligence -%
+        \begin{onecolentry}
+            \textbf{AI/ML:} << skills.artificial_intelligence | join(', ') >>
+        \end{onecolentry}
+        \vspace{0.2 cm}
+        %- endif -%
+        %- if skills.generative_ai -%
+        \begin{onecolentry}
+            \textbf{Generative AI:} << skills.generative_ai | join(', ') >>
+        \end{onecolentry}
+        \vspace{0.2 cm}
+        %- endif -%
+        %- if skills.mobile_development -%
+        \begin{onecolentry}
+            \textbf{Mobile Development:} << skills.mobile_development | join(', ') >>
+        \end{onecolentry}
+        \vspace{0.2 cm}
+        %- endif -%
+        %- if skills.backend -%
+        \begin{onecolentry}
+            \textbf{Backend/APIs:} << skills.backend | join(', ') >>
+        \end{onecolentry}
+        \vspace{0.2 cm}
+        %- endif -%
+        %- if skills.tools -%
+        \begin{onecolentry}
+            \textbf{Tools \& Platforms:} << skills.tools | join(', ') >>
+        \end{onecolentry}
+        %- endif -%
+
+
+    \section{Education}
+        %- for edu in education -%
+        \begin{twocolentry}{
+            \textit{<< edu.start_date >> -- << edu.end_date >>}}
+            \textbf{<< edu.institution >>}
+
+            \textit{<< edu.degree >> in << edu.specialization >>}
+        \end{twocolentry}
+
+        \vspace{0.10 cm}
+        \begin{onecolentry}
+            \begin{highlights}
+                \item GPA: << edu.gpa >>
+                \item \textbf{Coursework:} << edu.coursework | join(', ') >>
+            \end{highlights}
+        \end{onecolentry}
+        %- if not loop.last -%
+        \vspace{0.2 cm}
+        %- endif -%
+        %- endfor -%
+
+
+    \section{Experience}
+        %- for exp in experience -%
+        \begin{twocolentry}{
+            \textit{<< exp.start_date >> -- << exp.end_date >>}}
+            \textbf{<< exp.role >>}
+
+            \textit{<< exp.company >>}
+        \end{twocolentry}
+
+        \vspace{0.10 cm}
+        \begin{onecolentry}
+            \begin{highlights}
+            %- for bullet in exp.description -%
+                \item << bullet >>
+            %- endfor -%
+            \end{highlights}
+        \end{onecolentry}
+        %- if not loop.last -%
+        \vspace{0.20 cm}
+        %- endif -%
+        %- endfor -%
+
+
+    \section{Projects}
+        %- for proj in projects -%
+        \begin{twocolentry}{
+            \textit{%- if proj.link -%\href{<< proj.link >>}{<< proj.category or 'Link' >>}%- elif proj.url -%\href{<< proj.url >>}{<< proj.category or 'Link' >>}%- else -%<< proj.category >>%- endif -%}}
+            \textbf{<< proj.title >>}
+        \end{twocolentry}
+
+        \vspace{0.10 cm}
+        \begin{onecolentry}
+            \begin{highlights}
+            %- for bullet in proj.description -%
+                \item << bullet >>
+            %- endfor -%
+            \end{highlights}
+        \end{onecolentry}
+        %- if not loop.last -%
+        \vspace{0.20 cm}
+        %- endif -%
+        %- endfor -%
+
+
+    %- if certifications -%
+    \section{Certifications \& Achievements}
+        \begin{samepage}
+        %- for cert in certifications -%
+            %- if cert is string -%
+                %- set parts = cert.split(' - ') -%
+                \begin{twocolentry}{
+                    \textit{<< parts[1] if parts|length > 1 else '' >>}}
+                    \textbf{<< parts[0] >>}
+                \end{twocolentry}
+            %- else -%
+                \begin{twocolentry}{
+                    \textit{%- if cert.url -%\href{<< cert.url >>}{<< cert.authority >>}%- else -%<< cert.authority >>%- endif -%}}
+                    \textbf{<< cert.title >>}
+                \end{twocolentry}
+            %- endif -%
+        %- endfor -%
+        \end{samepage}
+    %- endif -%
+
+\end{document}

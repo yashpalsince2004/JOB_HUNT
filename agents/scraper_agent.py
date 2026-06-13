@@ -8,6 +8,7 @@ failures per-scraper to prevent a single scraper from failing the entire run.
 from typing import Any
 
 from agents.base_agent import BaseAgent
+from config.settings import Settings
 from scrapers import (
     GreenhouseScraper,
     LeverScraper,
@@ -16,6 +17,21 @@ from scrapers import (
     IndeedScraper,
     WellfoundScraper,
     WorkdayScraper,
+    NaukriScraper,
+    CutshortScraper,
+    FounditScraper,
+    InternshalaScraper,
+    QuantiphiScraper,
+    FractalScraper,
+    TigerScraper,
+    TredenceScraper,
+    LatentviewScraper,
+    MusigmaScraper,
+    NielseniqScraper,
+    Course5Scraper,
+    GramenerScraper,
+    ExlScraper,
+    TalentdScraper,
     JobListing,
 )
 
@@ -37,14 +53,32 @@ class ScraperAgent(BaseAgent):
         Returns:
             List of aggregated JobListing objects.
         """
+        settings = Settings()
+        limit = settings.max_jobs_per_source
+
         scrapers = [
-            GreenhouseScraper(),
-            LeverScraper(),
-            AshbyScraper(),
-            SmartRecruitersScraper(),
-            IndeedScraper(),
-            WellfoundScraper(),
-            WorkdayScraper(),
+            GreenhouseScraper(max_jobs_limit=limit),
+            LeverScraper(max_jobs_limit=limit),
+            AshbyScraper(max_jobs_limit=limit),
+            SmartRecruitersScraper(max_jobs_limit=limit),
+            IndeedScraper(max_jobs_limit=limit),
+            WellfoundScraper(max_jobs_limit=limit),
+            WorkdayScraper(max_jobs_limit=limit),
+            NaukriScraper(max_jobs_limit=limit),
+            CutshortScraper(max_jobs_limit=limit),
+            FounditScraper(max_jobs_limit=limit),
+            InternshalaScraper(max_jobs_limit=limit),
+            QuantiphiScraper(max_jobs_limit=limit),
+            FractalScraper(max_jobs_limit=limit),
+            TigerScraper(max_jobs_limit=limit),
+            TredenceScraper(max_jobs_limit=limit),
+            LatentviewScraper(max_jobs_limit=limit),
+            MusigmaScraper(max_jobs_limit=limit),
+            NielseniqScraper(max_jobs_limit=limit),
+            Course5Scraper(max_jobs_limit=limit),
+            GramenerScraper(max_jobs_limit=limit),
+            ExlScraper(max_jobs_limit=limit),
+            TalentdScraper(max_jobs_limit=limit),
         ]
 
         all_listings: list[JobListing] = []

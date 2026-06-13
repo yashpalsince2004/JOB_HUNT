@@ -108,3 +108,28 @@ class TelegramNotifier:
             f"<code>{html.escape(error_message)}</code>"
         )
         self._send_message(message)
+
+    def send_premium_alert(self, job_data: dict[str, Any]) -> None:
+        """Send a special alert for premium AI opportunities when job_score >= 85."""
+        company = html.escape(job_data.get("company", "Unknown"))
+        title = html.escape(job_data.get("title", "Unknown"))
+        location = html.escape(job_data.get("location", "Unknown"))
+        score = job_data.get("job_score", 0.0)
+        experience = html.escape(job_data.get("experience", "Not Specified") or "Not Specified")
+        url = job_data.get("url", "#")
+
+        message = (
+            f"🚀 <b>Premium AI Opportunity</b>\n\n"
+            f"<b>Company:</b> {company}\n"
+            f"<b>Role:</b> {title}\n"
+            f"<b>Location:</b> {location}\n"
+            f"<b>Score:</b> {score}\n"
+            f"<b>Experience:</b> {experience}\n"
+            f"<b>Apply Link:</b> {url}"
+        )
+        self._send_message(message)
+
+    def send_high_priority_alert(self, job_data: dict[str, Any]) -> None:
+        """Legacy compatibility wrapper."""
+        self.send_premium_alert(job_data)
+

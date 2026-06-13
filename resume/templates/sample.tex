@@ -1,0 +1,386 @@
+\documentclass[10pt, letterpaper]{article}
+
+% Packages:
+\usepackage[
+    ignoreheadfoot,
+    top=2 cm,
+    bottom=2 cm,
+    left=2 cm,
+    right=2 cm,
+    footskip=1.0 cm,
+]{geometry}
+\usepackage{titlesec}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage[dvipsnames]{xcolor}
+\definecolor{primaryColor}{RGB}{0, 79, 144}
+\usepackage{enumitem}
+\usepackage{fontawesome5}
+\usepackage{amsmath}
+\usepackage[
+    pdftitle={Yash Pal's CV},
+    pdfauthor={Yash Pal},
+    pdfcreator={LaTeX with RenderCV},
+    colorlinks=true,
+    urlcolor=primaryColor
+]{hyperref}
+\usepackage[pscoord]{eso-pic}
+\usepackage{calc}
+\usepackage{bookmark}
+\usepackage{lastpage}
+\usepackage{changepage}
+\usepackage{paracol}
+\usepackage{ifthen}
+\usepackage{needspace}
+\usepackage{iftex}
+
+\ifPDFTeX
+    \input{glyphtounicode}
+    \pdfgentounicode=1
+    \usepackage[utf8]{inputenc}
+    \usepackage{lmodern}
+\fi
+
+\AtBeginEnvironment{adjustwidth}{\partopsep0pt}
+\pagestyle{empty}
+\setcounter{secnumdepth}{0}
+\setlength{\parindent}{0pt}
+\setlength{\topskip}{0pt}
+\setlength{\columnsep}{0cm}
+\makeatletter
+\let\ps@customFooterStyle\ps@plain
+\patchcmd{\ps@customFooterStyle}{\thepage}{
+    \color{gray}\textit{\small Yash Pal - Page \thepage{} of \pageref*{LastPage}}
+}{}{}
+\makeatother
+\pagestyle{customFooterStyle}
+
+\titleformat{\section}{\needspace{4\baselineskip}\bfseries\large}{}{0pt}{}[\vspace{1pt}\titlerule]
+
+\titlespacing{\section}{
+    -1pt
+}{
+    0.3 cm
+}{
+    0.2 cm
+}
+
+\renewcommand\labelitemi{$\circ$}
+\newenvironment{highlights}{
+    \begin{itemize}[
+        topsep=0.10 cm,
+        parsep=0.10 cm,
+        partopsep=0pt,
+        itemsep=0pt,
+        leftmargin=0.4 cm + 10pt
+    ]
+}{
+    \end{itemize}
+}
+
+\newenvironment{highlightsforbulletentries}{
+    \begin{itemize}[
+        topsep=0.10 cm,
+        parsep=0.10 cm,
+        partopsep=0pt,
+        itemsep=0pt,
+        leftmargin=10pt
+    ]
+}{
+    \end{itemize}
+}
+
+\newenvironment{onecolentry}{
+    \begin{adjustwidth}{
+        0.2 cm + 0.00001 cm
+    }{
+        0.2 cm + 0.00001 cm
+    }
+}{
+    \end{adjustwidth}
+}
+
+\newenvironment{twocolentry}[2][]{
+    \onecolentry
+    \def\secondColumn{#2}
+    \setcolumnwidth{\fill, 4.5 cm}
+    \begin{paracol}{2}
+}{
+    \switchcolumn \raggedleft \secondColumn
+    \end{paracol}
+    \endonecolentry
+}
+
+\newenvironment{header}{
+    \setlength{\topsep}{0pt}\par\kern\topsep\centering\linespread{1.5}
+}{
+    \par\kern\topsep
+}
+
+\newcommand{\placelastupdatedtext}{%
+  \AddToShipoutPictureFG*{%
+    \put(
+        \LenToUnit{\paperwidth-2 cm-0.2 cm+0.05cm},
+        \LenToUnit{\paperheight-1.0 cm}
+    ){\vtop{{\null}\makebox[0pt][c]{
+        \small\color{gray}\textit{}\hspace{\widthof{}}
+    }}}%
+  }%
+}%
+
+\let\hrefWithoutArrow\href
+\renewcommand{\href}[2]{\hrefWithoutArrow{#1}{\ifthenelse{\equal{#2}{}}{ }{#2 }\raisebox{.15ex}{\footnotesize \faExternalLink*}}}
+
+
+\begin{document}
+    \newcommand{\AND}{\unskip
+        \cleaders\copy\ANDbox\hskip\wd\ANDbox
+        \ignorespaces
+    }
+    \newsavebox\ANDbox
+    \sbox\ANDbox{}
+
+    \placelastupdatedtext
+    \begin{header}
+        \textbf{\fontsize{24 pt}{24 pt}\selectfont Yash Pal}
+
+        \vspace{0.3 cm}
+
+        \normalsize
+        \mbox{{\color{black}\footnotesize\faMapMarker*}\hspace*{0.13cm}Mumbai}%
+        \kern 0.25 cm%
+        \AND%
+        \kern 0.25 cm%
+        \mbox{\hrefWithoutArrow{mailto:2004yashpal@gmail.com}{\color{black}{\footnotesize\faEnvelope[regular]}\hspace*{0.13cm}2004yashpal@gmail.com}}%
+        \kern 0.25 cm%
+        \AND%
+        \kern 0.25 cm%
+        \mbox{\hrefWithoutArrow{tel:+919326259927}{\color{black}{\footnotesize\faPhone*}\hspace*{0.13cm}9326259927}}%
+        \kern 0.25 cm%
+        \AND%
+        \kern 0.25 cm%
+        \mbox{\hrefWithoutArrow{https://yashpal.me/}{\color{black}{\footnotesize\faLink}\hspace*{0.13cm}yashpal.me}}%
+        \kern 0.25 cm%
+        \AND%
+        \kern 0.25 cm%
+        \mbox{\hrefWithoutArrow{www.linkedin.com/in/yash-pal-since2004}{\color{black}{\footnotesize\faLinkedinIn}\hspace*{0.13cm}Linkedin}}%
+        \kern 0.25 cm%
+        \AND%
+        \kern 0.25 cm%
+        \mbox{\hrefWithoutArrow{https://GitHub.com/yashpalsince2004}{\color{black}{\footnotesize\faGitHub}\hspace*{0.13cm}GitHub}}%
+    \end{header}
+
+    \vspace{0.3 cm - 0.3 cm}
+
+
+    \section{Profile}
+
+        \begin{onecolentry}
+            Agentic AI Developer with hands-on experience designing and deploying intelligent multi-LLM systems that reason, plan, and execute autonomous workflows. Built MITRA-AI — a production multi-agent platform integrating 5 LLM providers via intelligent NLP routing — and published research in Multimodal Conversational AI. Proficient in Python, FastAPI, REST API integration, prompt engineering, and MCP (Model Context Protocol). Actively building expertise in RAG pipelines, vector databases, and Azure AI Foundry / Azure OpenAI to architect enterprise-grade agentic solutions. Committed to responsible AI practices and performance observability in production systems.
+        \end{onecolentry}
+
+        \vspace{0.2 cm}
+
+
+    \section{Skills}
+
+        \begin{onecolentry}
+            \textbf{Agentic AI:} Multi-Agent System Design, LLM Reasoning \& Planning Workflows, Tool-Use Patterns, Agentic Orchestration, MCP (Model Context Protocol), Prompt Engineering, Context-Aware NLP Routing
+        \end{onecolentry}
+
+        \vspace{0.2 cm}
+
+        \begin{onecolentry}
+            \textbf{Generative AI \& LLMs:} OpenAI API, Claude API (Anthropic), Google Gemini API, DeepSeek API, LLM Inferencing Pipelines, RAG Pipelines (actively building), Embedding Models \& Semantic Search (conceptual)
+        \end{onecolentry}
+
+        \vspace{0.2 cm}
+
+        \begin{onecolentry}
+            \textbf{Cloud \& Azure:} Azure AI Foundry (actively upskilling), Azure OpenAI (actively upskilling), AWS (deployed projects), Firebase Suite, Google AI Studio
+        \end{onecolentry}
+
+        \vspace{0.2 cm}
+
+        \begin{onecolentry}
+            \textbf{Backend \& APIs:} Python, JavaScript, FastAPI, REST API Design \& Integration, Microservices Architecture, Async Patterns, Webhooks
+        \end{onecolentry}
+
+        \vspace{0.2 cm}
+
+        \begin{onecolentry}
+            \textbf{Vector Databases:} pgVector / OpenSearch / Milvus (conceptual \& actively integrating), Cloud Firestore
+        \end{onecolentry}
+
+        \vspace{0.2 cm}
+
+        \begin{onecolentry}
+            \textbf{Frameworks \& Tools:} LangChain (actively upskilling), LangGraph (actively upskilling), TensorFlow, PyTorch, Flutter, Git/GitHub, Linux, Docker (basic)
+        \end{onecolentry}
+
+        \vspace{0.2 cm}
+
+        \begin{onecolentry}
+            \textbf{Practices:} Responsible AI, Observability \& Logging, Secure API Design, Technical Documentation, Agile Development
+        \end{onecolentry}
+
+
+    \section{Education}
+
+        \begin{twocolentry}{
+            \textit{Nov 2022 – May 2026}}
+            \textbf{University of Mumbai}
+
+            \textit{Bachelor of Engineering in Computer Science (Artificial Intelligence \& Machine Learning)}
+        \end{twocolentry}
+
+        \vspace{0.10 cm}
+        \begin{onecolentry}
+            \begin{highlights}
+                \item GPA: 7.5/10.0
+                \item \textbf{Coursework:} Artificial Intelligence, Deep Learning, Machine Learning, Reinforcement Learning, Data Structures, Project Management.
+            \end{highlights}
+        \end{onecolentry}
+
+
+    \section{Experience}
+
+        \begin{twocolentry}{
+            \textit{March 2026 – April 2026}}
+            \textbf{Automation Engineering Intern}
+
+            \textit{Xemi Private Limited}
+        \end{twocolentry}
+
+        \vspace{0.10 cm}
+        \begin{onecolentry}
+            \begin{highlights}
+                \item Developed Python scripts to automate testing workflows, reducing manual regression effort and improving system reliability across application modules.
+                \item Performed systematic bug identification, root-cause analysis, and diagnostic reporting — applying analytical problem-solving to complex software issues.
+                \item Monitored application performance and contributed logging analysis and observability insights to the QA pipeline.
+                \item Collaborated cross-functionally and maintained technical documentation aligned with responsible engineering practices.
+            \end{highlights}
+        \end{onecolentry}
+
+        \vspace{0.20 cm}
+
+    
+
+
+    \section{Projects}
+
+        \begin{twocolentry}{
+            \textit{\href{https://GitHub.com/MITRA0616/Application.git}{MITRA-AI}}}
+            \textbf{MITRA-AI — Multi-Agent Agentic AI Platform (Python / FastAPI)}
+        \end{twocolentry}
+
+        \vspace{0.10 cm}
+        \begin{onecolentry}
+            \begin{highlights}
+                \item Designed and built a production-grade agentic AI platform integrating 5 LLM providers (Claude, GPT-4, Gemini, DeepSeek, Kimi K2) with intelligent NLP-based routing — implementing core agentic patterns: reasoning, planning, tool-use, and autonomous workflow execution.
+                \item Architected a scalable Python/FastAPI backend with multi-agent orchestration, async request handling, and enterprise-style REST API design — analogous to Azure AI Foundry's agent service architecture.
+                \item Implemented MCP (Model Context Protocol) awareness and prompt engineering strategies to optimize context-aware, multi-turn LLM interactions across providers.
+                \item Deployed on AWS with Git-based version control; designed for responsible AI output with logging and performance monitoring across agent pipelines.
+                \item Tools Used: Python, FastAPI, Flutter/Dart, OpenAI API, Claude API, Gemini API, DeepSeek API, REST APIs, MCP, AWS, Git.
+            \end{highlights}
+        \end{onecolentry}
+
+        \vspace{0.2 cm}
+
+        \begin{twocolentry}{
+            \textit{\href{https://GitHub.com/yashpalsince2004/Generative-Adversarial-Networks-GANs-with-TensorFlow.git}{GAN}}}
+            \textbf{Generative Adversarial Networks (GANs) — Autonomous Training Pipeline}
+        \end{twocolentry}
+
+        \vspace{0.10 cm}
+        \begin{onecolentry}
+            \begin{highlights}
+                \item Designed an autonomous adversarial training pipeline in Python/TensorFlow where Generator and Discriminator agents iteratively reason and adapt — a foundational pattern shared with modern agentic AI feedback loops.
+                \item Implemented custom training loops with performance monitoring and iterative model optimization.
+                \item Tools Used: TensorFlow, Python, Jupyter Notebook
+            \end{highlights}
+        \end{onecolentry}
+
+        \vspace{0.2 cm}
+
+        \begin{twocolentry}{
+            \textit{\href{https://GitHub.com/yashpalsince2004/Image-Super-Resolution.git}{SRCNN}}}
+            \textbf{SRCNN Super-Resolution — End-to-End AI Inference Pipeline}
+        \end{twocolentry}
+
+        \vspace{0.10 cm}
+        \begin{onecolentry}
+            \begin{highlights}
+                \item Built a complete AI inference pipeline — data ingestion, preprocessing, embedding-style feature extraction, model inferencing, and output evaluation — structurally analogous to a RAG pipeline for enterprise knowledge retrieval.
+                \item Evaluated pipeline performance using PSNR metrics, demonstrating a systematic approach to AI output quality monitoring.
+                \item Tools Used: TensorFlow, Keras, OpenCV, Python
+            \end{highlights}
+        \end{onecolentry}
+
+        \vspace{0.2 cm}
+
+        \begin{twocolentry}{
+            \textit{\href{https://GitHub.com/yashpalsince2004/BookMyTurf}{BookMyTurf}}}
+            \textbf{Book-My-Turf — Cloud-Native SaaS with Enterprise API Integration}
+        \end{twocolentry}
+
+        \vspace{0.10 cm}
+        \begin{onecolentry}
+            \begin{highlights}
+                \item Developed a cloud-backed SaaS platform integrating Firebase (managed cloud DB), REST APIs, and real-time authentication — demonstrating enterprise API and cloud service integration patterns.
+                \item Designed scalable data architecture for multi-entity systems (users, bookings, turf owners) with Cloud Firestore as a managed metadata store.
+                \item Tools Used: Flutter, Firebase, Dart, REST APIs, Cloud Firestore
+            \end{highlights}
+        \end{onecolentry}
+
+
+    \section{Certifications \& Achievements}
+
+        \begin{samepage}
+            \begin{twocolentry}{
+                \textit{\href{https://www.linkedin.com/feed/update/urn:li:activity:7414010969787650048/}{Google}}}
+                \textbf{Research Paper Published — Multimodal Conversational AI System}
+            \end{twocolentry}
+
+            \begin{twocolentry}{
+                \textit{\href{https://verify.skilljar.com/c/6zn8pjg7mgnf}{Anthropic}}}
+                \textbf{AI Fluency: Framework and Foundations}
+            \end{twocolentry}
+
+            \begin{twocolentry}{
+                \textit{\href{https://coursera.org/share/7c631b414d238d7c53531711c3922fd9}{Coursera}}}
+                \textbf{Machine Learning Specialization – DeepLearning.AI}
+            \end{twocolentry}
+
+            \begin{twocolentry}{
+                \textit{\href{https://www.linkedin.com/feed/update/urn:li:activity:7414010969787650048/}{Google}}}
+                \textbf{Generative AI Studio}
+            \end{twocolentry}
+
+            \begin{twocolentry}{
+                \textit{\href{https://catalog-education.oracle.com/ords/certview/sharebadge?id=102A86DBB5CB3A634F16414E9AD30200E7D923C620DF7334FE30D2ABDD79765F}{Oracle}}}
+                \textbf{Oracle Cloud Infrastructure AI Foundations}
+            \end{twocolentry}
+
+            \begin{twocolentry}{
+                \textit{\href{https://www.linkedin.com/learning/certificates/53e2843636e579ac995d686aeae500b2adeac04a2404a204551ae6d7ce66b0f5}{LinkedIn}}}
+                \textbf{Career Essentials in Generative AI by Microsoft and LinkedIn}
+            \end{twocolentry}
+
+            \begin{twocolentry}{
+                \textit{\href{https://www.linkedin.com/learning/certificates/8f368e27cbaabc79c7e9a95c8b25e9aa22fd623198c66dd393b30c54a9ccb33d}{LinkedIn}}}
+                \textbf{Career Essentials in GitHub Professional Certificate}
+            \end{twocolentry}
+
+            \begin{twocolentry}{
+                \textit{\href{https://www.linkedin.com/learning/certificates/b75be309f93e544e9b737e816eb76348f08d5853d4abbaa303dd93ab2ee05828}{LinkedIn}}}
+                \textbf{Microsoft Copilot: The Art of Prompt Writing}
+            \end{twocolentry}
+
+            \begin{twocolentry}{
+                \textit{\href{https://www.linkedin.com/posts/yash-pal-since2004_skillindia-ugcPost-7463531615307317248-Eyai?utm_source=share&utm_medium=member_desktop&rcm=ACoAAFC_2KoBOWn0iOV7zJ_XbCgQFl7iVZ9EZGA}{Skillindia}}}
+                \textbf{AI For All by Skill India}
+            \end{twocolentry}
+        \end{samepage}
+
+\end{document}

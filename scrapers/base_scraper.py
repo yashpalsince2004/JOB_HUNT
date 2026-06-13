@@ -38,11 +38,24 @@ class JobListing:
     posted_date: str = ""
     scraped_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     status: str = "new"
+    role_category: str = "OTHER"
+    job_score: float = 0.0
+    ats_score: float = 0.0
+    company_priority: int = 70
+    experience: str = ""
+    salary: str = ""
+    skills: str = ""
+    employment_type: str = ""
+    remote_status: str = ""
+    salary_min: float = 0.0
+    salary_max: float = 0.0
+    salary_currency: str = "INR"
+    salary_period: str = "yearly"
 
     @property
     def job_id(self) -> str:
-        """Deterministic hash ID based on company + title + URL."""
-        raw = f"{self.company.lower().strip()}|{self.title.lower().strip()}|{self.url.strip()}"
+        """Deterministic hash ID based on company + title + location."""
+        raw = f"{self.company.lower().strip()}|{self.title.lower().strip()}|{self.location.lower().strip()}"
         return hashlib.sha256(raw.encode()).hexdigest()[:16]
 
     def to_dict(self) -> dict[str, Any]:
@@ -75,10 +88,11 @@ class BaseScraper(ABC):
         - scrape() -> list[JobListing]
     """
 
-    def __init__(self, timeout: int = 30, max_retries: int = 3) -> None:
+    def __init__(self, timeout: int = 30, max_retries: int = 3, max_jobs_limit: int | None = None) -> None:
         self._timeout = timeout
         self._max_retries = max_retries
         self._client: httpx.Client | None = None
+        self._max_jobs_limit = max_jobs_limit
 
     @property
     @abstractmethod

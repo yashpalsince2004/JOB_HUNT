@@ -2,11 +2,15 @@
 ATS Scoring Agent.
 
 Calculates a suitability score (0-100) for a job listing against the master resume.
-Uses keyword overlap (40% weight) and semantic similarity via sentence-transformers (60% weight).
-Falls back gracefully to keyword overlap if sentence-transformers is not available.
+Weights:
+- Keyword Match: 25%
+- Skill Match: 25%
+- Semantic Similarity: 40%
+- Project Relevance: 10%
 """
 
 import json
+import re
 from pathlib import Path
 from typing import Any
 
@@ -31,7 +35,6 @@ class ATSScoringAgent(BaseAgent):
         # Try initializing SentenceTransformer
         try:
             from sentence_transformers import SentenceTransformer
-            # Use a tiny, fast model
             self.logger.info("Initializing SentenceTransformer (all-MiniLM-L6-v2)...")
             self._model = SentenceTransformer("all-MiniLM-L6-v2")
             self._model_initialized = True
@@ -39,7 +42,7 @@ class ATSScoringAgent(BaseAgent):
         except Exception as e:
             self.logger.warning(
                 f"Failed to initialize sentence-transformers: {e}. "
-                "Falling back to keyword-only scoring."
+                "Falling back to keyword/skill average for semantic similarity."
             )
 
     def _load_resume_text(self) -> tuple[set[str], str]:
@@ -96,13 +99,46 @@ class ATSScoringAgent(BaseAgent):
             return 0.0
         try:
             embeddings = self._model.encode([text1, text2], convert_to_tensor=True)
-            # cosine similarity
             from sentence_transformers.util import cos_sim
             similarity = cos_sim(embeddings[0], embeddings[1])
             return float(similarity.item())
         except Exception as e:
             self.logger.warning(f"Error calculating semantic similarity: {e}")
             return 0.0
+
+    def _calculate_project_relevance(self, jd_text: str) -> float:
+        """
+        Calculate Project Relevance score (0-100) based on project matches in JD.
+        """
+        jd_lower = jd_text.lower()
+        bonus = 0
+        
+        # 1. MITRA AI (+20)
+        mitra_kws = ["llm", "genai", "generative ai", "ai assistant", "nlp", "natural language processing"]
+        if any(kw in jd_lower for kw in mitra_kws):
+            bonus += 20
+            
+        # 2. AI Job Hunter Agent (+20)
+        hunter_kws = ["python", "ai", "automation", "backend"]
+        if any(kw in jd_lower for kw in hunter_kws):
+            bonus += 20
+            
+        # 3. BookMyTurf (+15)
+        turf_kws = ["flutter", "firebase", "mobile", "ios", "android"]
+        if any(kw in jd_lower for kw in turf_kws):
+            bonus += 15
+            
+        # 4. GAN Project (+15)
+        gan_kws = ["deep learning", "computer vision", "gan", "generative adversarial"]
+        if any(kw in jd_lower for kw in gan_kws):
+            bonus += 15
+            
+        # 5. SRCNN (+15)
+        srcnn_kws = ["computer vision", "tensorflow", "srcnn", "super resolution"]
+        if any(kw in jd_lower for kw in srcnn_kws):
+            bonus += 15
+            
+        return float(min(100, bonus))
 
     def run(self, analyzed_jobs: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """
@@ -114,8 +150,6 @@ class ATSScoringAgent(BaseAgent):
         Returns:
             List of job dicts updated with 'ats_score' and filtered if score matches requirements.
         """
-        settings = Settings()
-        threshold = settings.min_ats_score
         scored_jobs = []
 
         resume_skills, resume_text = self._load_resume_text()
@@ -131,39 +165,65 @@ class ATSScoringAgent(BaseAgent):
             required_skills = [s.lower().strip() for s in analysis.get("required_skills", [])]
             ats_keywords = [k.lower().strip() for k in analysis.get("ats_keywords", [])]
 
-            # 1. Keyword Score
+            jd_text = f"{analysis.get('summary', '')} " + " ".join(analysis.get("responsibilities", [])) + f" {job.get('description', '')}"
+
+            # 1. Keyword Score (25% weight)
             target_keywords = set(required_skills + ats_keywords)
             if not target_keywords:
-                keyword_score = 50.0  # Default neutral score
+                keyword_score = 100.0
             else:
-                matches = 0
-                for kw in target_keywords:
-                    # Check if keyword is in resume skills or text
-                    if kw in resume_skills or kw in resume_text.lower():
-                        matches += 1
+                matches = sum(1 for kw in target_keywords if kw in resume_skills or kw in resume_text.lower())
                 keyword_score = (matches / len(target_keywords)) * 100.0
 
-            # 2. Semantic Score
-            jd_text = f"{analysis.get('summary', '')} " + " ".join(analysis.get("responsibilities", []))
+            # 2. Skill Score (25% weight)
+            if not required_skills:
+                skill_score = 100.0
+            else:
+                matches = sum(1 for skill in required_skills if skill in resume_skills)
+                skill_score = (matches / len(required_skills)) * 100.0
+
+            # 3. Semantic Similarity (40% weight)
             if self._model_initialized:
                 semantic_score = self._calculate_cosine_similarity(resume_text, jd_text) * 100.0
-                # Bound similarity to positive values
-                semantic_score = max(0.0, semantic_score)
-                # Final weighted score
-                final_score = round(0.4 * keyword_score + 0.6 * semantic_score, 1)
+                semantic_score = max(0.0, min(100.0, semantic_score))
             else:
-                # Fallback to pure keyword score
-                final_score = round(keyword_score, 1)
+                # Fallback to average of keyword and skill matches
+                semantic_score = (keyword_score + skill_score) / 2.0
 
-            job["ats_score"] = final_score
-            self.logger.info(
-                f"Scored {job.get('company')} — {job.get('title')}: "
-                f"ATS Score = {final_score} (Keywords: {keyword_score:.1f}, Semantic: {semantic_score if self._model_initialized else 'N/A'})"
+            # 4. Project Relevance Score (10% weight)
+            project_relevance_score = self._calculate_project_relevance(jd_text)
+
+            # Final weighted ATS Score
+            final_score = round(
+                0.25 * keyword_score +
+                0.25 * skill_score +
+                0.40 * semantic_score +
+                0.10 * project_relevance_score,
+                1
             )
 
-            # Keep all jobs but tag them so we can filter later or let them proceed
+            job["ats_score"] = final_score
+            
+            # Map score to category
+            if final_score >= 90:
+                match_cat = "Excellent Match"
+            elif final_score >= 80:
+                match_cat = "Strong Match"
+            elif final_score >= 70:
+                match_cat = "Good Match"
+            elif final_score >= 60:
+                match_cat = "Potential Match"
+            else:
+                match_cat = "Weak Match"
+                
+            job["ats_match_category"] = match_cat
+
+            self.logger.info(
+                f"Scored {job.get('company')} — {job.get('title')}: "
+                f"ATS Score = {final_score} ({match_cat}) [KW: {keyword_score:.1f}, Skill: {skill_score:.1f}, Sem: {semantic_score:.1f}, Proj: {project_relevance_score:.1f}]"
+            )
+
             scored_jobs.append(job)
 
-        # Sort jobs by ATS score descending
         scored_jobs.sort(key=lambda x: x.get("ats_score", 0), reverse=True)
         return scored_jobs
