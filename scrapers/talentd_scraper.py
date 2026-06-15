@@ -66,20 +66,39 @@ class TalentdScraper(BaseScraper):
         url = f"{self.base_url}?page={page_num}"
         logger.info(f"[Talentd] Scraping page {page_num}: {url}")
 
+        browser = self._browser
+        local_playwright = None
         try:
-            with sync_playwright() as p:
-                browser = p.chromium.launch(headless=True)
-                context = browser.new_context(
-                    user_agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
-                    viewport={"width": 1280, "height": 800}
-                )
-                page = context.new_page()
-                page.goto(url, timeout=30000)
-                page.wait_for_timeout(3000)
-                html = page.content()
+            if not browser:
+                from playwright.sync_api import sync_playwright
+                local_playwright = sync_playwright().start()
+                browser = local_playwright.chromium.launch(headless=True)
+            context = browser.new_context(
+                user_agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+                viewport={"width": 1280, "height": 800}
+            )
+            page = context.new_page()
+            
+            # Stealth script features
+            page.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
+            page.add_init_script("Object.defineProperty(navigator, 'languages', {get: () => ['en-US', 'en']})")
+            page.add_init_script("Object.defineProperty(navigator, 'plugins', {get: () => [1, 2, 3, 4, 5]})")
+            
+            page.goto(url, timeout=30000)
+            page.wait_for_timeout(3000)
+            html = page.content()
+            context.close()
+            if local_playwright:
                 browser.close()
+                local_playwright.stop()
         except Exception as e:
             logger.warning(f"[Talentd] Playwright failed on page {page_num}: {e}")
+            if local_playwright:
+                try:
+                    browser.close()
+                except Exception:
+                    pass
+                local_playwright.stop()
             return []
 
         soup = BeautifulSoup(html, "lxml")
@@ -174,30 +193,33 @@ class TalentdScraper(BaseScraper):
 
         # Fallback list for testing and stability
         if not all_jobs:
-            logger.info("[Talentd] Returning default mock opportunities")
-            roles = [
-                ("Junior AI Developer", "Quantiphi", "Mumbai", "0-1 Years", "6 LPA", "Python, LLM, FastAPI"),
-                ("Associate Data Scientist", "Fractal Analytics", "Pune", "0-2 Years", "8 LPA", "Python, SQL, Machine Learning"),
-                ("Graduate ML Engineer", "Tiger Analytics", "Chennai", "0-1 Years", "7 LPA", "Python, PyTorch, SQL")
-            ]
-            for title, comp, loc, exp, sal, sk in roles:
-                sal_min, sal_max, sal_curr, sal_per = self._normalize_salary(sal)
-                all_jobs.append(JobListing(
-                    company=comp,
-                    title=title,
-                    url=f"https://www.talentd.in/jobs/details-{title.lower().replace(' ', '-')}",
-                    location=loc,
-                    description=f"Talentd Fresher Job: {title} at {comp}. Experience: {exp}. Skills: {sk}.",
-                    source=self.source_name,
-                    posted_date="Posted Today",
-                    experience=exp,
-                    salary=sal,
-                    skills=sk,
-                    salary_min=sal_min,
-                    salary_max=sal_max,
-                    salary_currency=sal_curr,
-                    salary_period=sal_per
-                ))
+            if self.use_mock_fallback:
+                logger.info("[Talentd] Returning default mock opportunities")
+                roles = [
+                    ("Junior AI Developer", "Quantiphi", "Mumbai", "0-1 Years", "6 LPA", "Python, LLM, FastAPI"),
+                    ("Associate Data Scientist", "Fractal Analytics", "Pune", "0-2 Years", "8 LPA", "Python, SQL, Machine Learning"),
+                    ("Graduate ML Engineer", "Tiger Analytics", "Chennai", "0-1 Years", "7 LPA", "Python, PyTorch, SQL")
+                ]
+                for title, comp, loc, exp, sal, sk in roles:
+                    sal_min, sal_max, sal_curr, sal_per = self._normalize_salary(sal)
+                    all_jobs.append(JobListing(
+                        company=comp,
+                        title=title,
+                        url=f"https://www.talentd.in/jobs/details-{title.lower().replace(' ', '-')}",
+                        location=loc,
+                        description=f"Talentd Fresher Job: {title} at {comp}. Experience: {exp}. Skills: {sk}.",
+                        source=self.source_name,
+                        posted_date="Posted Today",
+                        experience=exp,
+                        salary=sal,
+                        skills=sk,
+                        salary_min=sal_min,
+                        salary_max=sal_max,
+                        salary_currency=sal_curr,
+                        salary_period=sal_per
+                    ))
+            else:
+                logger.warning("[Talentd] Scraper failed or returned no results.")
 
         print(f"[Talentd]\nQuery: freshers\nJobs Found: {len(all_jobs)}\nJobs Parsed: {len(all_jobs)}")
         return all_jobs[:run_limit]

@@ -79,38 +79,80 @@ class NaukriScraper(BaseScraper):
 
     def _scrape_query(self, query: str, limit: int = 50) -> list[JobListing]:
         jobs: list[JobListing] = []
-        query_hyphenated = query.lower().replace(" ", "-")
-        url = f"https://www.naukri.com/{query_hyphenated}-jobs"
-        
+        # Use the proper Naukri search URL with query-string params
+        encoded_query = urllib.parse.quote_plus(query)
+        url = f"https://www.naukri.com/jobs-in-india?k={encoded_query}&jobAge=7"
+
         logger.info(f"[Naukri] Query: '{query}' searching...")
-        
+
+        browser = self._browser
+        local_playwright = None
+
         try:
-            with sync_playwright() as p:
-                browser = p.chromium.launch(
-                    headless=True,
-                    args=["--disable-blink-features=AutomationControlled"]
+            if not browser:
+                from playwright.sync_api import sync_playwright
+                local_playwright = sync_playwright().start()
+                browser = local_playwright.chromium.launch(
+                    headless=False,
+                    args=["--disable-blink-features=AutomationControlled"],
                 )
-                context = browser.new_context(
-                    user_agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
-                    viewport={"width": 1280, "height": 800}
-                )
-                page = context.new_page()
-                page.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
-                page.goto(url, timeout=30000)
-                
-                # Wait for job wrappers to render
-                page.wait_for_selector(".srp-jobtuple-wrapper", timeout=15000)
-                
-                # Scroll down slightly to trigger lazy loaders
-                page.evaluate("window.scrollTo(0, document.body.scrollHeight/2)")
+
+            context = browser.new_context(
+                user_agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+                viewport={"width": 1280, "height": 800},
+            )
+            page = context.new_page()
+
+            # Stealth: mask automation signals
+            page.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
+            page.add_init_script("Object.defineProperty(navigator, 'languages', {get: () => ['en-US', 'en']})")
+            page.add_init_script("Object.defineProperty(navigator, 'plugins', {get: () => [1, 2, 3, 4, 5]})")
+
+            html = ""
+            try:
+                page.goto(url, timeout=45000, wait_until="domcontentloaded")
+
+                # Wait for job cards; try primary selector then fallback
+                try:
+                    page.wait_for_selector(".srp-jobtuple-wrapper", timeout=20000)
+                except Exception:
+                    # Naukri occasionally changes markup; try alternate selector
+                    page.wait_for_selector("article.jobTuple", timeout=10000)
+
+                # Scroll to trigger lazy-loaded jobs
+                page.evaluate("window.scrollTo(0, document.body.scrollHeight / 2)")
                 page.wait_for_timeout(2000)
-                
+
                 html = page.content()
-                browser.close()
+
+            except Exception as e:
+                logger.warning(f"[Naukri] Page load failed for query '{query}': {e}")
+                print(f"[Naukri]\nQuery: {query}\nJobs Found: 0\nJobs Parsed: 0")
+
+            finally:
+                # Always close the context to keep the shared browser healthy
+                try:
+                    context.close()
+                except Exception:
+                    pass
+
+            # No HTML means page load failed — nothing to parse
+            if not html:
+                return []
+
         except Exception as e:
-            logger.warning(f"[Naukri] Playwright failed for query '{query}': {e}")
+            logger.warning(f"[Naukri] Browser/context setup failed for query '{query}': {e}")
             print(f"[Naukri]\nQuery: {query}\nJobs Found: 0\nJobs Parsed: 0")
             return []
+
+        finally:
+            # Only tear down Playwright if we launched it ourselves (not shared)
+            if local_playwright:
+                try:
+                    browser.close()
+                except Exception:
+                    pass
+                local_playwright.stop()
 
         soup = BeautifulSoup(html, "lxml")
         cards = soup.select(".srp-jobtuple-wrapper")
@@ -157,7 +199,7 @@ class NaukriScraper(BaseScraper):
                 
                 # 7. Description snippet
                 desc_elem = card.select_one(".job-desc") or card.select_one(".description")
-                description = desc_elem.get_text(strip=True) if desc_elem else ""
+                description = desc_elem.get_text(strip=True) if desc_elem else f"Naukri Job: {title} at {company}. Location: {location}. Experience: {experience}. Salary: {salary}."
                 
                 # 8. Posted Date
                 posted_elem = card.select_one(".posted-date") or card.select_one(".postedVal")
@@ -211,32 +253,35 @@ class NaukriScraper(BaseScraper):
 
         # Fallback if no jobs parsed
         if not all_jobs:
-            logger.info("[Naukri] Returning default mock opportunities")
-            roles = [
-                ("AI Engineer Fresher", "Quantiphi", "Mumbai", "0-2 Years", "6.5 LPA", "Python, Machine Learning, LLMs, NLP"),
-                ("ML Engineer Fresher", "Fractal Analytics", "Mumbai", "0-1 Years", "8.5 LPA", "Python, SQL, PyTorch, Pandas"),
-                ("Python Developer Fresher", "Tiger Analytics", "Mumbai", "0-3 Years", "9.0 LPA", "Python, PyTorch, ML Ops, SQL"),
-                ("Flutter Developer Fresher", "Course5 Intelligence", "Mumbai", "0-1 Years", "6.0 LPA", "Flutter, Dart, Mobile, Firebase")
-            ]
-            for title, comp, loc, exp, sal, sk in roles:
-                listing = JobListing(
-                    company=comp,
-                    title=title,
-                    url="https://www.naukri.com",
-                    location=loc,
-                    description=f"Naukri Job: {title} at {comp}. Experience: {exp}. Skills: {sk}.",
-                    source=self.source_name,
-                    posted_date="Posted Today",
-                    experience=exp,
-                    salary=sal,
-                    skills=sk,
-                )
-                sal_min, sal_max, sal_curr, sal_per = self._normalize_salary(sal)
-                listing.salary_min = sal_min
-                listing.salary_max = sal_max
-                listing.salary_currency = sal_curr
-                listing.salary_period = sal_per
-                all_jobs.append(listing)
+            if self.use_mock_fallback:
+                logger.info("[Naukri] Returning default mock opportunities")
+                roles = [
+                    ("AI Engineer Fresher", "Quantiphi", "Mumbai", "0-2 Years", "6.5 LPA", "Python, Machine Learning, LLMs, NLP"),
+                    ("ML Engineer Fresher", "Fractal Analytics", "Mumbai", "0-1 Years", "8.5 LPA", "Python, SQL, PyTorch, Pandas"),
+                    ("Python Developer Fresher", "Tiger Analytics", "Mumbai", "0-3 Years", "9.0 LPA", "Python, PyTorch, ML Ops, SQL"),
+                    ("Flutter Developer Fresher", "Course5 Intelligence", "Mumbai", "0-1 Years", "6.0 LPA", "Flutter, Dart, Mobile, Firebase")
+                ]
+                for title, comp, loc, exp, sal, sk in roles:
+                    listing = JobListing(
+                        company=comp,
+                        title=title,
+                        url="https://www.naukri.com",
+                        location=loc,
+                        description=f"Naukri Job: {title} at {comp}. Experience: {exp}. Skills: {sk}.",
+                        source=self.source_name,
+                        posted_date="Posted Today",
+                        experience=exp,
+                        salary=sal,
+                        skills=sk,
+                    )
+                    sal_min, sal_max, sal_curr, sal_per = self._normalize_salary(sal)
+                    listing.salary_min = sal_min
+                    listing.salary_max = sal_max
+                    listing.salary_currency = sal_curr
+                    listing.salary_period = sal_per
+                    all_jobs.append(listing)
+            else:
+                logger.warning("[Naukri] Scraper failed or returned no results.")
 
         logger.info(f"[Naukri] Finished. Total scraped: {len(all_jobs)}")
         return all_jobs

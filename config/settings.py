@@ -54,6 +54,11 @@ class Settings(BaseSettings):
     scraper_delay_max: float = 3.0  # max delay between requests (seconds)
     scraper_max_retries: int = 3
     max_jobs_per_source: int = 50  # cap per scraper to avoid runaway
+    playwright_headless: bool = True
+    # Path to Chrome/Chromium binary for non-headless runs (Indian job boards).
+    # Playwright's bundled Chromium crashes with SIGBUS on macOS in non-headless mode;
+    # system Chrome is properly signed and stable. Set to "" to use Playwright's default.
+    chrome_executable_path: str = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 
     # ─── Rate Limits ───
     gemini_rpm: int = 10  # conservative free-tier RPM

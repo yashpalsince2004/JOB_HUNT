@@ -143,29 +143,32 @@ class FractalScraper(BaseScraper):
 
         # Fallback if no jobs parsed
         if not jobs:
-            logger.info(f"[{self.company_name}] Returning default mock opportunities")
-            roles = [
-                ("Associate Data Scientist", "Pune", "0-2 Years", "8.5 LPA", "Python, SQL, PyTorch, Pandas"),
-                ("AI Engineer", "Mumbai", "0-3 Years", "9.0 LPA", "Python, LLMs, NLP, PyTorch"),
-                ("MLOps Engineer", "Mumbai", "1-3 Years", "8.0 LPA", "Python, Docker, Kubernetes, AWS, ML Ops")
-            ]
-            for title, loc, exp, sal, sk in roles:
-                listing = JobListing(
-                    company=self.company_name,
-                    title=title,
-                    url=self.fallback_url,
-                    location=loc,
-                    description=f"Fractal Analytics data science and AI role: {title}. Location: {loc}. Experience: {exp}. Skills: {sk}.",
-                    source=self.source_name,
-                    posted_date="Just now",
-                    company_priority=100
-                )
-                sal_min, sal_max, sal_curr, sal_per = self._normalize_salary(sal)
-                listing.salary_min = sal_min
-                listing.salary_max = sal_max
-                listing.salary_currency = sal_curr
-                listing.salary_period = sal_per
-                jobs.append(listing)
+            if self.use_mock_fallback:
+                logger.info(f"[{self.company_name}] Returning default mock opportunities")
+                roles = [
+                    ("Associate Data Scientist", "Pune", "0-2 Years", "8.5 LPA", "Python, SQL, PyTorch, Pandas"),
+                    ("AI Engineer", "Mumbai", "0-3 Years", "9.0 LPA", "Python, LLMs, NLP, PyTorch"),
+                    ("MLOps Engineer", "Mumbai", "1-3 Years", "8.0 LPA", "Python, Docker, Kubernetes, AWS, ML Ops")
+                ]
+                for title, loc, exp, sal, sk in roles:
+                    listing = JobListing(
+                        company=self.company_name,
+                        title=title,
+                        url=self.fallback_url,
+                        location=loc,
+                        description=f"Fractal Analytics data science and AI role: {title}. Location: {loc}. Experience: {exp}. Skills: {sk}.",
+                        source=self.source_name,
+                        posted_date="Just now",
+                        company_priority=100
+                    )
+                    sal_min, sal_max, sal_curr, sal_per = self._normalize_salary(sal)
+                    listing.salary_min = sal_min
+                    listing.salary_max = sal_max
+                    listing.salary_currency = sal_curr
+                    listing.salary_period = sal_per
+                    jobs.append(listing)
+            else:
+                logger.warning(f"[{self.company_name}] Scraper failed or returned no results.")
 
         print(f"[Fractal]\nQuery: AI/ML/Software\nJobs Found: {len(jobs)}\nJobs Parsed: {len(jobs)}")
         return jobs

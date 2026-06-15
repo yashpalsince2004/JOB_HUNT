@@ -27,9 +27,9 @@ def test_relevance_agent_location_matching():
     agent = RelevanceAgent()
 
     assert agent._matches_location("Mumbai")
-    assert agent._matches_location("Pune")
+    assert not agent._matches_location("Pune")
     assert agent._matches_location("Remote, India")
-    assert agent._matches_location("Bangalore, Karnataka")
+    assert not agent._matches_location("Bangalore, Karnataka")
     
     # Excluded
     assert not agent._matches_location("San Francisco, CA")
@@ -99,8 +99,8 @@ def test_relevance_agent_scoring():
 
     # Secondary Indian Tech Hub (Bangalore)
     is_valid, score, reason = agent._evaluate_location("Bangalore, India")
-    assert is_valid
-    assert score == 75
+    assert not is_valid
+    assert score == 0
 
     # Global remote
     is_valid, score, reason = agent._evaluate_location("London (Remote)")
@@ -195,7 +195,7 @@ def test_relevance_agent_classification_and_job_scoring():
     listing = JobListing(
         company="Google",
         title="Generative AI Engineer",
-        location="Pune",
+        location="Mumbai",
         description="We are looking for a Generative AI Engineer to build LLM products. Required skills: Python, PyTorch, LLM, Firebase.",
         url="https://google.com/jobs/1"
     )
@@ -258,8 +258,8 @@ def test_relevance_agent_strict_location_rejection():
     assert score == 100.0
 
     is_valid, score, reason = agent._evaluate_location("Pune, Maharashtra")
-    assert is_valid
-    assert score == 95.0
+    assert not is_valid
+    assert score == 0.0
 
     # Remote locations
     is_valid, score, reason = agent._evaluate_location("Remote, India")
@@ -276,7 +276,7 @@ def test_relevance_agent_strict_location_rejection():
     is_valid, score, reason = agent._evaluate_location("San Francisco, USA")
     assert not is_valid
     assert score == 0.0
-    assert "International onsite" in reason
+    assert "Outside target location region" in reason
 
     is_valid, score, reason = agent._evaluate_location("Singapore")
     assert not is_valid

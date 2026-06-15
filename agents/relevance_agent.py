@@ -211,44 +211,11 @@ class RelevanceAgent(BaseAgent):
                     return True, 85.0, "Worldwide Remote"
                 return True, 90.0, "Remote India"
 
-        # 2. Strict onsite location parser & blacklist
-        blacklist_regions = [
-            "usa", "united states", "us", "san francisco", "new york", "silicon valley", "california",
-            "uk", "united kingdom", "london", "germany", "france", "berlin", "paris", "europe",
-            "canada", "toronto", "vancouver", "brazil", "mexico", "latam", "latin america", "argentina",
-            "singapore", "malaysia", "thailand", "spain", "dubai", "uae"
-        ]
-
-        words = re.split(r'\W+', loc_lower)
-        for reg in blacklist_regions:
-            if reg in words or (len(reg) > 3 and reg in loc_lower):
-                return False, 0.0, f"International onsite in {reg}"
-
-        # If not remote and no India location is mentioned, imply international onsite and reject
-        india_keywords = [
-            "india", "mumbai", "navi mumbai", "thane", "pune", "bangalore", "bengaluru",
-            "hyderabad", "chennai", "noida", "gurgaon", "delhi", "ncr", "kolkata", "ahmedabad",
-            "jaipur", "gurugram", "karnataka", "maharashtra", "telangana", "tamil nadu", "haryana",
-            "coimbatore", "kochi", "kerala", "indore", "chandigarh"
-        ]
-        is_india = any(kw in loc_lower for kw in india_keywords)
-        if not is_india:
-            return False, 0.0, "International onsite implied"
-
-        # 3. Score acceptable Indian onsite / hybrid locations
+        # 2. Strict onsite location parser: only Mumbai, Navi Mumbai, and Thane are accepted
         if "navi mumbai" in loc_lower or "thane" in loc_lower or "mumbai" in loc_lower:
             return True, 100.0, "Mumbai/Navi Mumbai/Thane Region"
-            
-        if "pune" in loc_lower:
-            return True, 95.0, "Pune Region"
 
-        if "bangalore" in loc_lower or "bengaluru" in loc_lower:
-            return True, 75.0, "Bangalore"
-
-        if any(w in loc_lower for w in ["hyderabad", "chennai", "noida", "gurgaon", "gurugram"]):
-            return True, 70.0, "Hyderabad/Chennai/Noida/Gurgaon"
-
-        return True, 70.0, "Other India location"
+        return False, 0.0, "Outside target location region (Mumbai/Thane/Navi Mumbai/Remote)"
 
     def _matches_location(self, location: str) -> bool:
         """Compatibility wrapper for unit tests checking if a location is allowed."""
@@ -691,21 +658,29 @@ class RelevanceAgent(BaseAgent):
             company_bonus = 0
             comp_lower = company.lower().strip()
             if "quantiphi" in comp_lower:
-                company_bonus = 20
+                company_bonus = 25
             elif "fractal" in comp_lower:
-                company_bonus = 20
+                company_bonus = 25
             elif "tiger analytics" in comp_lower or "tiger" in comp_lower:
-                company_bonus = 20
+                company_bonus = 25
+            elif "tredence" in comp_lower:
+                company_bonus = 25
+            elif "latentview" in comp_lower:
+                company_bonus = 25
             elif "mu sigma" in comp_lower or "musigma" in comp_lower:
-                company_bonus = 15
-            elif "course5" in comp_lower:
-                company_bonus = 15
+                company_bonus = 20
             elif "nielseniq" in comp_lower or "nielsen" in comp_lower:
-                company_bonus = 15
+                company_bonus = 20
             elif "exl" in comp_lower:
-                company_bonus = 15
+                company_bonus = 20
+            elif "course5" in comp_lower:
+                company_bonus = 20
             elif "gramener" in comp_lower:
-                company_bonus = 15
+                company_bonus = 20
+            elif "ltimindtree" in comp_lower:
+                company_bonus = 20
+            elif "persistent" in comp_lower:
+                company_bonus = 20
 
             # Calculate total weighted job score (0-100)
             base_job_score = (

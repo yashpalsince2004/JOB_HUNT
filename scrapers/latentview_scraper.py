@@ -32,20 +32,34 @@ class LatentviewScraper(BaseScraper):
         jobs: list[JobListing] = []
         logger.info(f"[{self.company_name}] Running LatentView careers scraper...")
 
+        browser = self._browser
+        local_playwright = None
+        
         try:
-            with sync_playwright() as p:
-                browser = p.chromium.launch(headless=True)
-                context = browser.new_context(
-                    user_agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
-                    viewport={"width": 1280, "height": 800}
-                )
-                page = context.new_page()
-                page.goto(self.fallback_url, timeout=30000)
-                
-                # Wait for any job list elements or wait a few seconds
-                page.wait_for_timeout(5000)
-                html = page.content()
+            if not browser:
+                from playwright.sync_api import sync_playwright
+                local_playwright = sync_playwright().start()
+                browser = local_playwright.chromium.launch(headless=True)
+            context = browser.new_context(
+                user_agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+                viewport={"width": 1280, "height": 800}
+            )
+            page = context.new_page()
+            
+            # Stealth script features
+            page.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
+            page.add_init_script("Object.defineProperty(navigator, 'languages', {get: () => ['en-US', 'en']})")
+            page.add_init_script("Object.defineProperty(navigator, 'plugins', {get: () => [1, 2, 3, 4, 5]})")
+            
+            page.goto(self.fallback_url, timeout=30000)
+            
+            # Wait for any job list elements or wait a few seconds
+            page.wait_for_timeout(5000)
+            html = page.content()
+            context.close()
+            if local_playwright:
                 browser.close()
+                local_playwright.stop()
 
             soup = BeautifulSoup(html, "lxml")
             

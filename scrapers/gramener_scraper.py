@@ -36,20 +36,39 @@ class GramenerScraper(BaseScraper):
             info = self.detector.detect(self.company_name, self.fallback_url)
             url = info.get("career_url", self.fallback_url)
 
+            browser = self._browser
+            local_playwright = None
             try:
-                with sync_playwright() as p:
-                    browser = p.chromium.launch(headless=True)
-                    context = browser.new_context(
-                        user_agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
-                        viewport={"width": 1280, "height": 800}
-                    )
-                    page = context.new_page()
-                    page.goto(url, timeout=30000)
-                    page.wait_for_timeout(4000)
-                    html = page.content()
+                if not browser:
+                    from playwright.sync_api import sync_playwright
+                    local_playwright = sync_playwright().start()
+                    browser = local_playwright.chromium.launch(headless=True)
+                context = browser.new_context(
+                    user_agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+                    viewport={"width": 1280, "height": 800}
+                )
+                page = context.new_page()
+                
+                # Stealth script features
+                page.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
+                page.add_init_script("Object.defineProperty(navigator, 'languages', {get: () => ['en-US', 'en']})")
+                page.add_init_script("Object.defineProperty(navigator, 'plugins', {get: () => [1, 2, 3, 4, 5]})")
+                
+                page.goto(url, timeout=30000)
+                page.wait_for_timeout(4000)
+                html = page.content()
+                context.close()
+                if local_playwright:
                     browser.close()
+                    local_playwright.stop()
             except Exception as e:
-                logger.warning(f"[{self.company_name}] Playwright failed: {e}. Falling back to default list.")
+                logger.warning(f"[{self.company_name}] Playwright failed: {e}.")
+                if local_playwright:
+                    try:
+                        browser.close()
+                    except Exception:
+                        pass
+                    local_playwright.stop()
                 html = ""
 
             soup = BeautifulSoup(html, "lxml")
@@ -97,23 +116,26 @@ class GramenerScraper(BaseScraper):
 
             # Fallback if no jobs parsed
             if not jobs:
-                roles = [
-                    ("Data Scientist", "Bangalore, India"),
-                    ("Associate Data Scientist", "Hyderabad, India"),
-                    ("Python Developer - Data Science Team", "Bangalore, India")
-                ]
-                for title, loc in roles:
-                    listing = JobListing(
-                        company=self.company_name,
-                        title=title,
-                        url="https://gramener.com/careers/",
-                        location=loc,
-                        description=f"Gramener data science role: {title}. Location: {loc}. Python, Data Visualization.",
-                        source=self.source_name,
-                        posted_date="Just now",
-                        company_priority=95
-                    )
-                    jobs.append(listing)
+                if self.use_mock_fallback:
+                    roles = [
+                        ("Data Scientist", "Bangalore, India"),
+                        ("Associate Data Scientist", "Hyderabad, India"),
+                        ("Python Developer - Data Science Team", "Bangalore, India")
+                    ]
+                    for title, loc in roles:
+                        listing = JobListing(
+                            company=self.company_name,
+                            title=title,
+                            url="https://gramener.com/careers/",
+                            location=loc,
+                            description=f"Gramener data science role: {title}. Location: {loc}. Python, Data Visualization.",
+                            source=self.source_name,
+                            posted_date="Just now",
+                            company_priority=95
+                        )
+                        jobs.append(listing)
+                else:
+                    logger.warning(f"[{self.company_name}] Scraper failed or returned no results.")
 
         except Exception as e:
             logger.error(f"[{self.company_name}] Scraper failed: {e}", exc_info=True)

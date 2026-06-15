@@ -71,31 +71,50 @@ class HiristScraper(BaseScraper):
         
         logger.info(f"[Hirist] Query: '{query}' searching: {url}")
         
+        browser = self._browser
+        local_playwright = None
+        
         try:
-            with sync_playwright() as p:
-                browser = p.chromium.launch(
+            if not browser:
+                from playwright.sync_api import sync_playwright
+                local_playwright = sync_playwright().start()
+                browser = local_playwright.chromium.launch(
                     headless=True,
                     args=["--disable-blink-features=AutomationControlled"]
                 )
-                context = browser.new_context(
-                    user_agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
-                    viewport={"width": 1280, "height": 800}
-                )
-                page = context.new_page()
-                page.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
-                page.goto(url, timeout=20000)
-                
-                # Wait for job listings container/cards
-                page.wait_for_selector(".job-box", timeout=8000)
-                
-                # Scroll
-                page.evaluate("window.scrollTo(0, document.body.scrollHeight/3)")
-                page.wait_for_timeout(2000)
-                
-                html = page.content()
+            context = browser.new_context(
+                user_agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+                viewport={"width": 1280, "height": 800}
+            )
+            page = context.new_page()
+            
+            # Stealth script features
+            page.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
+            page.add_init_script("Object.defineProperty(navigator, 'languages', {get: () => ['en-US', 'en']})")
+            page.add_init_script("Object.defineProperty(navigator, 'plugins', {get: () => [1, 2, 3, 4, 5]})")
+            
+            page.goto(url, timeout=20000)
+            
+            # Wait for job listings container/cards
+            page.wait_for_selector(".job-box", timeout=8000)
+            
+            # Scroll
+            page.evaluate("window.scrollTo(0, document.body.scrollHeight/3)")
+            page.wait_for_timeout(2000)
+            
+            html = page.content()
+            context.close()
+            if local_playwright:
                 browser.close()
+                local_playwright.stop()
         except Exception as e:
-            logger.warning(f"[Hirist] Playwright failed for query '{query}': {e}. Returning empty (fallback list will be used if needed).")
+            logger.warning(f"[Hirist] Playwright failed for query '{query}': {e}.")
+            if local_playwright:
+                try:
+                    browser.close()
+                except Exception:
+                    pass
+                local_playwright.stop()
             return []
 
         soup = BeautifulSoup(html, "lxml")
@@ -201,31 +220,34 @@ class HiristScraper(BaseScraper):
 
         # Fallback list for testing and stability
         if not all_jobs:
-            logger.info("[Hirist] Returning default mock opportunities")
-            roles = [
-                ("Python Developer", "Quantiphi", "Mumbai", "0-2 Years", "6.5 LPA", "Python, Django, Flask, SQL"),
-                ("ML Engineer", "Fractal Analytics", "Mumbai", "0-3 Years", "8.0 LPA", "Python, Scikit-learn, PyTorch, SQL"),
-                ("AI Application Developer", "Tiger Analytics", "Mumbai", "1-3 Years", "7.8 LPA", "Python, LLM, OpenAI, RAG"),
-                ("Flutter Developer", "Mu Sigma", "Mumbai", "0-1 Years", "6.0 LPA", "Flutter, Dart, Firebase, REST APIs")
-            ]
-            for title, comp, loc, exp, sal, sk in roles:
-                sal_min, sal_max, sal_curr, sal_per = self._normalize_salary(sal)
-                all_jobs.append(JobListing(
-                    company=comp,
-                    title=title,
-                    url=f"https://www.hirist.tech/j/{title.lower().replace(' ', '-')}-{comp.lower()}",
-                    location=loc,
-                    description=f"Hirist Job: {title} at {comp}. Experience: {exp}. Skills: {sk}.",
-                    source=self.source_name,
-                    posted_date="Posted Today",
-                    experience=exp,
-                    salary=sal,
-                    skills=sk,
-                    salary_min=sal_min,
-                    salary_max=sal_max,
-                    salary_currency=sal_curr,
-                    salary_period=sal_per
-                ))
+            if self.use_mock_fallback:
+                logger.info("[Hirist] Returning default mock opportunities")
+                roles = [
+                    ("Python Developer", "Quantiphi", "Mumbai", "0-2 Years", "6.5 LPA", "Python, Django, Flask, SQL"),
+                    ("ML Engineer", "Fractal Analytics", "Mumbai", "0-3 Years", "8.0 LPA", "Python, Scikit-learn, PyTorch, SQL"),
+                    ("AI Application Developer", "Tiger Analytics", "Mumbai", "1-3 Years", "7.8 LPA", "Python, LLM, OpenAI, RAG"),
+                    ("Flutter Developer", "Mu Sigma", "Mumbai", "0-1 Years", "6.0 LPA", "Flutter, Dart, Firebase, REST APIs")
+                ]
+                for title, comp, loc, exp, sal, sk in roles:
+                    sal_min, sal_max, sal_curr, sal_per = self._normalize_salary(sal)
+                    all_jobs.append(JobListing(
+                        company=comp,
+                        title=title,
+                        url=f"https://www.hirist.tech/j/{title.lower().replace(' ', '-')}-{comp.lower()}",
+                        location=loc,
+                        description=f"Hirist Job: {title} at {comp}. Experience: {exp}. Skills: {sk}.",
+                        source=self.source_name,
+                        posted_date="Posted Today",
+                        experience=exp,
+                        salary=sal,
+                        skills=sk,
+                        salary_min=sal_min,
+                        salary_max=sal_max,
+                        salary_currency=sal_curr,
+                        salary_period=sal_per
+                    ))
+            else:
+                logger.warning("[Hirist] Scraper failed or returned no results.")
 
         logger.info(f"[Hirist] Finished. Total scraped: {len(all_jobs)}")
         return all_jobs[:run_limit]

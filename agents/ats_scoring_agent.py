@@ -213,11 +213,11 @@ class ATSScoringAgent(BaseAgent):
             # Map score to label
             if final_score >= 90:
                 match_label = "Excellent Match"
-            elif final_score >= 80:
+            elif final_score >= 75:
                 match_label = "Strong Match"
-            elif final_score >= 70:
+            elif final_score >= 60:
                 match_label = "Good Match"
-            elif final_score >= 65:
+            elif final_score >= 55:
                 match_label = "Potential Match"
             else:
                 match_label = "Reject"

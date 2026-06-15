@@ -108,11 +108,18 @@ class BaseScraper(ABC):
         - scrape() -> list[JobListing]
     """
 
-    def __init__(self, timeout: int = 30, max_retries: int = 3, max_jobs_limit: int | None = None) -> None:
+    def __init__(self, timeout: int = 30, max_retries: int = 3, max_jobs_limit: int | None = None, browser: Any = None) -> None:
         self._timeout = timeout
         self._max_retries = max_retries
         self._client: httpx.Client | None = None
         self._max_jobs_limit = max_jobs_limit
+        self._browser = browser
+
+    @property
+    def use_mock_fallback(self) -> bool:
+        """Return True if running in a test suite (pytest) where fallback/mock lists are desired."""
+        import os
+        return bool(os.environ.get("PYTEST_CURRENT_TEST") or os.environ.get("TESTING"))
 
     @property
     @abstractmethod
