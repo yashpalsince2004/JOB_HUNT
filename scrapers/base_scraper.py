@@ -51,6 +51,26 @@ class JobListing:
     salary_max: float = 0.0
     salary_currency: str = "INR"
     salary_period: str = "yearly"
+    role_confidence: float = 0.0
+    role_score: float = 0.0
+    location_category: str = "Unknown"
+    location_score: float = 0.0
+    hard_reject: bool = False
+    extracted_experience_years: float = -1.0
+    experience_category: str = "Unknown"
+    experience_score: float = 0.0
+    freshness_score: float = 0.0
+    skill_score: float = 0.0
+    score_breakdown: str = ""
+    final_decision: str = "reject"
+    rejection_reason: str = ""
+    pre_llm_rank: int = -1
+    llm_selected: bool = False
+    llm_skip_reason: str = ""
+    ats_label: str = "Reject"
+    ats_threshold_used: float = 0.0
+    ats_pass: bool = False
+    easy_apply: bool = False
 
     @property
     def job_id(self) -> str:

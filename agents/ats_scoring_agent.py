@@ -29,6 +29,7 @@ class ATSScoringAgent(BaseAgent):
         super().__init__()
         settings = Settings()
         self._resume_path = Path(master_resume_path or settings.knowledge_dir / "master_resume.json")
+        self._min_ats_score = settings.min_ats_score
         self._model = None
         self._model_initialized = False
 
@@ -140,23 +141,28 @@ class ATSScoringAgent(BaseAgent):
             
         return float(min(100, bonus))
 
-    def run(self, analyzed_jobs: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    def run(self, analyzed_jobs: list[dict[str, Any]], debug_mode: bool = False) -> list[dict[str, Any]]:
         """
         Score job listings and filter out those below the threshold.
 
         Args:
             analyzed_jobs: List of job dicts from JDAnalysisAgent.
+            debug_mode: If True, uses lower threshold (60) instead of production threshold (80).
 
         Returns:
-            List of job dicts updated with 'ats_score' and filtered if score matches requirements.
+            List of job dicts updated with ATS scoring fields.
         """
         scored_jobs = []
+        threshold = 60.0 if debug_mode else self._min_ats_score
 
         resume_skills, resume_text = self._load_resume_text()
         if not resume_skills and not resume_text:
             self.logger.warning("Empty master resume. Scoring all jobs as 0.")
             for job in analyzed_jobs:
-                job["ats_score"] = 0
+                job["ats_score"] = 0.0
+                job["ats_label"] = "Reject"
+                job["ats_threshold_used"] = threshold
+                job["ats_pass"] = False
                 scored_jobs.append(job)
             return scored_jobs
 
@@ -204,23 +210,25 @@ class ATSScoringAgent(BaseAgent):
 
             job["ats_score"] = final_score
             
-            # Map score to category
+            # Map score to label
             if final_score >= 90:
-                match_cat = "Excellent Match"
+                match_label = "Excellent Match"
             elif final_score >= 80:
-                match_cat = "Strong Match"
+                match_label = "Strong Match"
             elif final_score >= 70:
-                match_cat = "Good Match"
-            elif final_score >= 60:
-                match_cat = "Potential Match"
+                match_label = "Good Match"
+            elif final_score >= 65:
+                match_label = "Potential Match"
             else:
-                match_cat = "Weak Match"
+                match_label = "Reject"
                 
-            job["ats_match_category"] = match_cat
+            job["ats_label"] = match_label
+            job["ats_threshold_used"] = threshold
+            job["ats_pass"] = final_score >= threshold
 
             self.logger.info(
                 f"Scored {job.get('company')} — {job.get('title')}: "
-                f"ATS Score = {final_score} ({match_cat}) [KW: {keyword_score:.1f}, Skill: {skill_score:.1f}, Sem: {semantic_score:.1f}, Proj: {project_relevance_score:.1f}]"
+                f"ATS Score = {final_score} ({match_label}) [Pass: {final_score >= threshold}, KW: {keyword_score:.1f}, Skill: {skill_score:.1f}, Sem: {semantic_score:.1f}, Proj: {project_relevance_score:.1f}]"
             )
 
             scored_jobs.append(job)

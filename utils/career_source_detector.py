@@ -22,20 +22,20 @@ class CareerSourceDetector:
         "quantiphi": {
             "company": "Quantiphi",
             "platform": "Workday",
-            "career_url": "https://quantiphi.myworkdayjobs.com/Careers",
-            "api_endpoint": "https://quantiphi.myworkdayjobs.com/wday/cxs/Quantiphi_Careers/Careers/jobs"
+            "career_url": "https://quantiphi.wd1.myworkdayjobs.com/Careers",
+            "api_endpoint": "https://quantiphi.wd1.myworkdayjobs.com/wday/cxs/Quantiphi_Careers/Careers/jobs"
         },
         "fractal": {
             "company": "Fractal Analytics",
             "platform": "Workday",
-            "career_url": "https://fractal.myworkdayjobs.com/Fractal",
-            "api_endpoint": "https://fractal.myworkdayjobs.com/wday/cxs/Fractal/Fractal/jobs"
+            "career_url": "https://fractal.wd3.myworkdayjobs.com/Fractal",
+            "api_endpoint": "https://fractal.wd3.myworkdayjobs.com/wday/cxs/Fractal/Fractal/jobs"
         },
         "fractal analytics": {
             "company": "Fractal Analytics",
             "platform": "Workday",
-            "career_url": "https://fractal.myworkdayjobs.com/Fractal",
-            "api_endpoint": "https://fractal.myworkdayjobs.com/wday/cxs/Fractal/Fractal/jobs"
+            "career_url": "https://fractal.wd3.myworkdayjobs.com/Fractal",
+            "api_endpoint": "https://fractal.wd3.myworkdayjobs.com/wday/cxs/Fractal/Fractal/jobs"
         },
         "tiger analytics": {
             "company": "Tiger Analytics",

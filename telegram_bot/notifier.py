@@ -51,25 +51,30 @@ class TelegramNotifier:
 
     def send_daily_summary(
         self,
-        jobs_scraped: int,
-        jobs_new: int,
-        jobs_relevant: int,
-        jobs_above_ats: int,
-        applications_prepared: int,
+        scraped: int,
+        deduped: int,
+        rejected_role: int,
+        rejected_location: int,
+        rejected_experience: int,
+        queued_gemini: int,
+        ats_qualified: int,
+        top_jobs_selected: int,
     ) -> None:
-        """Send a structured daily summary report."""
-        # We need datetime, let's import it locally
+        """Send a structured daily summary report with refined pipeline metrics."""
         from datetime import datetime as dt
         today = dt.now().strftime("%B %d, %Y")
 
         message = (
             f"🤖 <b>AI Job Hunter Daily Report</b>\n"
             f"📅 <i>{today}</i>\n\n"
-            f"🔍 Jobs Scraped: <b>{jobs_scraped}</b>\n"
-            f"🆕 New Unique: <b>{jobs_new}</b>\n"
-            f"🎯 Matching Profile: <b>{jobs_relevant}</b>\n"
-            f"📈 Scored Above ATS: <b>{jobs_above_ats}</b>\n"
-            f"💼 Packages Prepared: <b>{applications_prepared}</b>\n\n"
+            f"🔍 Jobs Scraped: <b>{scraped}</b>\n"
+            f"🆕 New Unique (Deduped): <b>{deduped}</b>\n"
+            f"❌ Rejected (Role): <b>{rejected_role}</b>\n"
+            f"❌ Rejected (Location): <b>{rejected_location}</b>\n"
+            f"❌ Rejected (Experience): <b>{rejected_experience}</b>\n"
+            f"🧠 Queued for Gemini: <b>{queued_gemini}</b>\n"
+            f"📈 ATS Qualified: <b>{ats_qualified}</b>\n"
+            f"🌟 Top Jobs Selected: <b>{top_jobs_selected}</b>\n\n"
             f"Check Google Sheets for full details!"
         )
         self._send_message(message)
@@ -132,4 +137,3 @@ class TelegramNotifier:
     def send_high_priority_alert(self, job_data: dict[str, Any]) -> None:
         """Legacy compatibility wrapper."""
         self.send_premium_alert(job_data)
-

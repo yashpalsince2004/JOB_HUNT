@@ -34,12 +34,8 @@ class IndeedScraper(BaseScraper):
         # Search Indeed India by default
         url = f"https://in.indeed.com/jobs?q={encoded_query}"
 
-        try:
-            logger.info(f"[Indeed] Searching for: {query}")
-            html = self._get_html(url)
-        except Exception as e:
-            logger.warning(f"[Indeed] Failed to fetch search results for query '{query}': {e}")
-            return []
+        logger.info(f"[Indeed] Searching for: {query}")
+        html = self._get_html(url)
 
         soup = BeautifulSoup(html, "lxml")
         
@@ -122,9 +118,16 @@ class IndeedScraper(BaseScraper):
             rem_limit = None
             if self._max_jobs_limit is not None:
                 rem_limit = self._max_jobs_limit - len(all_jobs)
-            jobs = self._scrape_query(query, limit=rem_limit)
-            all_jobs.extend(jobs)
-            self._polite_delay(3.0, 6.0)  # Indeed requires a larger delay to avoid blocking
+            try:
+                jobs = self._scrape_query(query, limit=rem_limit)
+                all_jobs.extend(jobs)
+                self._polite_delay(3.0, 6.0)  # Indeed requires a larger delay to avoid blocking
+            except Exception as e:
+                logger.warning(f"[Indeed] Failed to scrape query '{query}': {e}")
+                # If we detect 403 Forbidden blocking, abort the loop immediately
+                if "403" in str(e) or "forbidden" in str(e).lower() or "blocked" in str(e).lower():
+                    logger.error("[Indeed] Indeed is blocking requests (403 Forbidden). Aborting scraper run.")
+                    break
 
         logger.info(f"[Indeed] Total: {len(all_jobs)} jobs from {len(self._queries)} queries")
         return all_jobs

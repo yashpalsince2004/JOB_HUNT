@@ -60,6 +60,12 @@ class LLMClient:
         self._ollama_model = ollama_model
         self._gemini_client = None
         self._gemini_available = bool(api_key)
+        
+        # State tracking fields for diagnostic output
+        self.llm_provider_used = "none"
+        self.fallback_available = False
+        self.fallback_status = "Offline"
+        self.fallback_error = None
 
         if self._gemini_available:
             try:
@@ -72,6 +78,48 @@ class LLMClient:
             except Exception as e:
                 logger.warning(f"Failed to initialize Gemini: {e}")
                 self._gemini_available = False
+
+        # Run startup health check for Ollama
+        self.check_ollama_status()
+
+    def check_ollama_status(self) -> None:
+        """Startup health check for Ollama server and model availability."""
+        import httpx
+        logger.info(f"Checking Ollama status at {self._ollama_base_url}...")
+        try:
+            response = httpx.get(f"{self._ollama_base_url}/api/tags", timeout=2.0)
+            if response.status_code == 200:
+                self.fallback_available = True
+                data = response.json()
+                models = [m.get("name") for m in data.get("models", [])]
+                
+                # Check for target model matching
+                target = self._ollama_model
+                model_found = False
+                for m in models:
+                    if m == target or m.split(":")[0] == target.split(":")[0]:
+                        model_found = True
+                        break
+                
+                if model_found:
+                    self.fallback_status = "Ready"
+                    logger.info(f"Ollama fallback is available and model '{self._ollama_model}' is ready.")
+                else:
+                    self.fallback_status = "Degraded"
+                    logger.warning(
+                        f"Ollama is running, but model '{self._ollama_model}' was not found. "
+                        f"Available models: {models}"
+                    )
+            else:
+                self.fallback_available = False
+                self.fallback_status = "Offline"
+                self.fallback_error = f"HTTP status {response.status_code}"
+                logger.warning(f"Ollama server health check returned status {response.status_code}")
+        except Exception as e:
+            self.fallback_available = False
+            self.fallback_status = "Offline"
+            self.fallback_error = str(e)
+            logger.warning(f"Ollama health check failed: {e}. Fallback disabled.")
 
     @retry(
         retry=retry_if_exception_type(Exception),
@@ -96,11 +144,15 @@ class LLMClient:
             contents=contents,
             config=config if config else None,
         )
+        self.llm_provider_used = "gemini"
         return response.text
 
     def _call_ollama(self, prompt: str, system_prompt: str | None = None) -> str:
         """Call local Ollama instance as fallback."""
         import httpx
+
+        if not self.fallback_available:
+            raise LLMError("Ollama fallback is not available (offline or failed status checks).")
 
         logger.info(f"Falling back to Ollama ({self._ollama_model})")
 
@@ -120,8 +172,10 @@ class LLMClient:
                 timeout=120.0,
             )
             response.raise_for_status()
+            self.llm_provider_used = "ollama"
             return response.json()["message"]["content"]
         except Exception as e:
+            self.llm_provider_used = "none"
             raise LLMError(f"Ollama also failed: {e}") from e
 
     def generate_text(self, prompt: str, system_prompt: str | None = None) -> str:
@@ -146,6 +200,10 @@ class LLMClient:
                 return self._call_gemini(prompt, system_prompt)
             except Exception as e:
                 logger.warning(f"Gemini failed after retries: {e}")
+                # Disable Gemini for the remainder of this run if quota is exhausted
+                if "RESOURCE_EXHAUSTED" in str(e) or "429" in str(e):
+                    logger.warning("Gemini quota exhausted/rate-limited. Disabling Gemini for the remainder of this run.")
+                    self._gemini_available = False
 
         # Fallback to Ollama
         return self._call_ollama(prompt, system_prompt)

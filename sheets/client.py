@@ -10,6 +10,7 @@ Sheets structure:
   3. DailySummary — Per-day aggregated stats
   4. SkillGaps    — Most demanded skills across all JDs
   5. Interviews   — Interview tracking
+  6. TopJobs      — Strongest matching jobs of each day
 """
 
 from datetime import datetime, timezone
@@ -44,8 +45,8 @@ _SHEET_SCHEMAS = {
         "resume_path", "cover_letter_path", "applied_at", "status",
     ],
     "DailySummary": [
-        "date", "jobs_scraped", "jobs_new", "jobs_relevant",
-        "jobs_above_ats", "applications_prepared", "skipped",
+        "date", "scraped", "deduped", "rejected_role", "rejected_location",
+        "rejected_experience", "queued_gemini", "ats_qualified", "top_jobs_selected",
     ],
     "SkillGaps": [
         "skill", "demand_count", "in_resume", "last_updated",
@@ -56,6 +57,12 @@ _SHEET_SCHEMAS = {
     ],
     "AnalyticsCompanies": [
         "Company", "Role", "Location", "Experience", "Job Score", "ATS Score", "Posted Date", "Apply URL", "Status"
+    ],
+    "TopJobs": [
+        "Company", "Role", "Location", "Role Score", "Location Score", "Skill Score", "Company Score", "Experience Score", "Freshness Score", "ATS Score", "Final Score", "Apply URL", "Status", "Reason"
+    ],
+    "RejectedJobs": [
+        "Company", "Role", "Reason", "Location", "Experience"
     ],
 }
 
@@ -184,12 +191,139 @@ class SheetsClient:
         ws = self._get_sheet("Jobs")
         cell = ws.find(job_id)
         if cell:
-            # Status is the last column
-            status_col = len(_SHEET_SCHEMAS["Jobs"])
+            # Status is the 9th column (index 9 in 1-based index)
+            # Find the index of "status" in the headers
+            status_col = _SHEET_SCHEMAS["Jobs"].index("status") + 1
             ws.update_cell(cell.row, status_col, status)
             return True
         logger.warning(f"Job ID not found: {job_id}")
         return False
+
+    # ─── TopJobs Sheet ───
+
+    def update_top_jobs_sheet(self, new_jobs: list[dict[str, Any]]) -> None:
+        """
+        Merge new jobs with existing top jobs, sort by final score (job_score) descending,
+        and rewrite the TopJobs worksheet to keep it perfectly sorted.
+        """
+        ws = self._get_sheet("TopJobs")
+        headers = _SHEET_SCHEMAS["TopJobs"]
+        
+        # 1. Fetch existing records
+        rate_limiter.wait_sync("sheets")
+        existing_records = ws.get_all_records()
+        
+        # Map existing records back to standard dictionary format (lowercase keys)
+        merged_jobs = []
+        seen_urls = set()
+        
+        header_map = {
+            "Company": "company",
+            "Role": "title",
+            "Location": "location",
+            "Role Score": "role_score",
+            "Location Score": "location_score",
+            "Skill Score": "skill_score",
+            "Company Score": "company_priority",
+            "Experience Score": "experience_score",
+            "Freshness Score": "freshness_score",
+            "ATS Score": "ats_score",
+            "Final Score": "job_score",
+            "Apply URL": "url",
+            "Status": "status",
+            "Reason": "rejection_reason"
+        }
+        
+        for rec in existing_records:
+            job_dict = {}
+            for k, v in rec.items():
+                std_key = header_map.get(k)
+                if std_key:
+                    job_dict[std_key] = v
+            url = job_dict.get("url")
+            if url:
+                merged_jobs.append(job_dict)
+                seen_urls.add(url)
+                
+        # 2. Add new jobs if not already present
+        for job in new_jobs:
+            url = job.get("url")
+            if url and url not in seen_urls:
+                merged_jobs.append(job)
+                seen_urls.add(url)
+                
+        # 3. Sort descending by job_score (Final Score)
+        def get_score(j):
+            try:
+                return float(j.get("job_score", 0.0))
+            except (ValueError, TypeError):
+                return 0.0
+                
+        merged_jobs.sort(key=get_score, reverse=True)
+        
+        # 4. Clear and rewrite
+        rate_limiter.wait_sync("sheets")
+        ws.clear()
+        rate_limiter.wait_sync("sheets")
+        ws.append_row(headers, value_input_option=ValueInputOption.raw)
+        
+        rows = []
+        for job in merged_jobs:
+            # Rejection reason could be score breakdown or actual reject reason
+            reason_text = job.get("rejection_reason", "")
+            if not reason_text:
+                reason_text = job.get("score_breakdown", "")
+
+            row = [
+                str(job.get("company", "")),
+                str(job.get("title", "")),
+                str(job.get("location", "")),
+                str(job.get("role_score", 0.0)),
+                str(job.get("location_score", 0.0)),
+                str(job.get("skill_score", 0.0)),
+                str(job.get("company_priority", 70)),
+                str(job.get("experience_score", 0.0)),
+                str(job.get("freshness_score", 0.0)),
+                str(job.get("ats_score", 0.0)),
+                str(job.get("job_score", 0.0)),
+                str(job.get("url", "")),
+                str(job.get("status", "")),
+                str(reason_text)
+            ]
+            rows.append(row)
+            
+        if rows:
+            rate_limiter.wait_sync("sheets")
+            ws.append_rows(rows, value_input_option=ValueInputOption.raw)
+            logger.info(f"TopJobs sheet rewritten with {len(rows)} sorted jobs.")
+
+    # ─── RejectedJobs Sheet ───
+
+    def add_rejected_jobs(self, rejected_jobs: list[dict[str, Any]]) -> None:
+        """Add rejected jobs to the RejectedJobs sheet."""
+        if not rejected_jobs:
+            return
+        ws = self._get_sheet("RejectedJobs")
+        
+        rows = []
+        for job in rejected_jobs:
+            # Rejection reason could be score breakdown or actual reject reason
+            reason_text = job.get("rejection_reason", "")
+            if not reason_text:
+                reason_text = job.get("score_breakdown", "")
+
+            rows.append([
+                str(job.get("company", "")),
+                str(job.get("title", "")),
+                str(reason_text),
+                str(job.get("location", "")),
+                str(job.get("experience", ""))
+            ])
+            
+        if rows:
+            rate_limiter.wait_sync("sheets")
+            ws.append_rows(rows, value_input_option=ValueInputOption.raw)
+            logger.info(f"Appended {len(rows)} rejected jobs to RejectedJobs sheet.")
 
     # ─── Applications Sheet ───
 
@@ -213,21 +347,25 @@ class SheetsClient:
 
     def add_daily_summary(
         self,
-        jobs_scraped: int,
-        jobs_new: int,
-        jobs_relevant: int,
-        jobs_above_ats: int,
-        applications_prepared: int,
-        skipped: int,
+        scraped: int,
+        deduped: int,
+        rejected_role: int,
+        rejected_location: int,
+        rejected_experience: int,
+        queued_gemini: int,
+        ats_qualified: int,
+        top_jobs_selected: int,
     ) -> None:
-        """Log today's run summary."""
+        """Log today's run summary with refined metrics."""
         ws = self._get_sheet("DailySummary")
         today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-        row = [today, jobs_scraped, jobs_new, jobs_relevant,
-               jobs_above_ats, applications_prepared, skipped]
+        row = [
+            today, scraped, deduped, rejected_role, rejected_location,
+            rejected_experience, queued_gemini, ats_qualified, top_jobs_selected
+        ]
         rate_limiter.wait_sync("sheets")
         ws.append_row(row, value_input_option=ValueInputOption.raw)
-        logger.info(f"Daily summary logged: {jobs_scraped} scraped, {jobs_new} new")
+        logger.info(f"Daily summary logged: {scraped} scraped, {deduped} deduped, {top_jobs_selected} top jobs selected")
 
     # ─── Skill Gaps Sheet ───
 

@@ -32,6 +32,8 @@ from scrapers import (
     GramenerScraper,
     ExlScraper,
     TalentdScraper,
+    InstahyreScraper,
+    HiristScraper,
     JobListing,
 )
 
@@ -79,7 +81,16 @@ class ScraperAgent(BaseAgent):
             GramenerScraper(max_jobs_limit=limit),
             ExlScraper(max_jobs_limit=limit),
             TalentdScraper(max_jobs_limit=limit),
+            InstahyreScraper(max_jobs_limit=limit),
+            HiristScraper(max_jobs_limit=limit),
         ]
+        
+        import os
+        selected_scrapers_str = os.environ.get("SCRAPERS")
+        if selected_scrapers_str:
+            selected_names = [name.strip().lower() for name in selected_scrapers_str.split(",") if name.strip()]
+            scrapers = [s for s in scrapers if s.source_name.lower() in selected_names]
+            self.logger.info(f"Filtered scrapers to run: {[s.source_name for s in scrapers]}")
 
         all_listings: list[JobListing] = []
 

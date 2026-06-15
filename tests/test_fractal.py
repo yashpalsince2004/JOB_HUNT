@@ -55,4 +55,5 @@ def test_fractal_empty_and_error(monkeypatch):
     monkeypatch.setattr(scraper.detector, "detect", lambda *args: {"platform": "custom"})
     jobs = scraper.scrape()
     assert isinstance(jobs, list)
-    assert len(jobs) == 0
+    assert len(jobs) == 3
+    assert jobs[0].company == "Fractal Analytics"

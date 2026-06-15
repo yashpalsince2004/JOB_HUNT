@@ -23,6 +23,8 @@ from scrapers.course5_scraper import Course5Scraper
 from scrapers.gramener_scraper import GramenerScraper
 from scrapers.exl_scraper import ExlScraper
 from scrapers.talentd_scraper import TalentdScraper
+from scrapers.instahyre_scraper import InstahyreScraper
+from scrapers.hirist_scraper import HiristScraper
 
 __all__ = [
     "BaseScraper",
@@ -49,5 +51,7 @@ __all__ = [
     "GramenerScraper",
     "ExlScraper",
     "TalentdScraper",
+    "InstahyreScraper",
+    "HiristScraper",
 ]
 

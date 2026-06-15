@@ -43,6 +43,7 @@ class Settings(BaseSettings):
 
     # ─── Application Logic ───
     max_daily_applications: int = 10
+    top_k_for_llm: int = 5
     min_ats_score: int = 80
     dry_run: bool = False
     log_level: str = "INFO"

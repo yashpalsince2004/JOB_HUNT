@@ -179,7 +179,7 @@ def test_relevance_agent_classification_and_job_scoring():
     assert c1["confidence"] >= 90
 
     c2 = agent.classify_role("Flutter Developer", "Build premium mobile applications with Dart.")
-    assert c2["category"] == "FLUTTER"
+    assert c2["category"] == "MOBILE_FLUTTER"
 
     c3 = agent.classify_role("Accountant", "Manage corporate books and filings.")
     assert c3["category"] == "OTHER"
@@ -218,5 +218,147 @@ def test_ats_scoring_agent_refactor():
     
     proj_score2 = agent._calculate_project_relevance("Python backend development using Flutter.")
     assert proj_score2 == 35  # Matches AI Job Hunter (Python/Backend: +20) and BookMyTurf (Flutter: +15)
+
+
+def test_relevance_agent_custom_titles_and_taxonomy():
+    """Test custom titles role taxonomy classification and DevOps/Analytics consultancy checks."""
+    agent = RelevanceAgent()
+
+    # Test custom titles taxonomy
+    assert agent.classify_role("Decision Scientist", "")["category"] == "DATA_SCIENCE"
+    assert agent.classify_role("Machine Learning Specialist", "")["category"] == "ML_ENGINEERING"
+    assert agent.classify_role("ML Platform Engineer", "")["category"] == "PLATFORM_ENGINEERING"
+    assert agent.classify_role("AI Software Engineer", "")["category"] == "AI_ENGINEERING"
+    assert agent.classify_role("Prompt Engineer", "")["category"] == "GENAI_ENGINEERING"
+
+    # Test DevOps relevance checks
+    c_devops_relevant = agent.classify_role("DevOps Engineer", "We need a DevOps engineer to set up our ML platform and MLops pipelines.")
+    assert c_devops_relevant["category"] == "PLATFORM_ENGINEERING"
+    assert c_devops_relevant["confidence"] > 0
+    
+    c_devops_irrelevant = agent.classify_role("DevOps Engineer", "Normal web platform administration and networking.")
+    assert c_devops_irrelevant["category"] == "OTHER"
+
+    # Test Analytics Consultant relevance checks
+    c_consultant_relevant = agent.classify_role("Analytics Consultant", "Building predictive machine learning models in Python.")
+    assert c_consultant_relevant["category"] == "DATA_SCIENCE"
+    assert c_consultant_relevant["confidence"] > 0
+    
+    c_consultant_irrelevant = agent.classify_role("Analytics Consultant", "Business management and financial auditing.")
+    assert c_consultant_irrelevant["category"] == "OTHER"
+
+
+def test_relevance_agent_strict_location_rejection():
+    """Test early hard location rejection blacklist and remote worldwide/India exceptions."""
+    agent = RelevanceAgent()
+
+    # Preferred locations
+    is_valid, score, reason = agent._evaluate_location("Mumbai, Maharashtra")
+    assert is_valid
+    assert score == 100.0
+
+    is_valid, score, reason = agent._evaluate_location("Pune, Maharashtra")
+    assert is_valid
+    assert score == 95.0
+
+    # Remote locations
+    is_valid, score, reason = agent._evaluate_location("Remote, India")
+    assert is_valid
+    assert score == 90.0
+    assert "Remote India" in reason
+
+    is_valid, score, reason = agent._evaluate_location("London (Remote)")
+    assert is_valid
+    assert score == 85.0
+    assert "Worldwide Remote" in reason
+
+    # Hard rejects
+    is_valid, score, reason = agent._evaluate_location("San Francisco, USA")
+    assert not is_valid
+    assert score == 0.0
+    assert "International onsite" in reason
+
+    is_valid, score, reason = agent._evaluate_location("Singapore")
+    assert not is_valid
+    assert score == 0.0
+
+    is_valid, score, reason = agent._evaluate_location("London, UK")
+    assert not is_valid
+    assert score == 0.0
+
+
+def test_relevance_agent_experience_limits():
+    """Test experience range limits and senior keyword exclusions with experience overrides."""
+    agent = RelevanceAgent()
+
+    # Under 3 years
+    is_valid, score, reason = agent._evaluate_experience("AI Engineer", "Requires 2 years of experience.")
+    assert is_valid
+    assert score == 20.0
+
+    # Over 3 years (rejected)
+    is_valid, score, reason = agent._evaluate_experience("AI Engineer", "Requires 5 years of experience.")
+    assert not is_valid
+    assert score == 0.0
+
+    # Senior keyword with experience <= 3 (override should allow it)
+    is_valid_title, reason = agent._check_title_exclusions("Senior AI Engineer", 2.0)
+    assert is_valid_title
+
+    # Senior keyword without explicit <= 3 experience (should reject)
+    is_valid_title, reason = agent._check_title_exclusions("Senior AI Engineer", None)
+    assert not is_valid_title
+    
+    is_valid_title, reason = agent._check_title_exclusions("Senior AI Engineer", 4.0)
+    assert not is_valid_title
+
+
+def test_llm_client_ollama_status(monkeypatch):
+    """Test LLMClient Ollama health checks and statuses."""
+    from utils.llm_client import LLMClient
+
+    class MockResponseReady:
+        status_code = 200
+        def json(self):
+            return {"models": [{"name": "llama3.1:latest"}]}
+
+    class MockResponseDegraded:
+        status_code = 200
+        def json(self):
+            return {"models": [{"name": "mistral:latest"}]}
+
+    # Mock health check HTTP requests
+    calls = []
+    def mock_get(url, timeout=None):
+        calls.append(url)
+        if "api/tags" in url:
+            return MockResponseReady()
+        raise Exception("Connection error")
+
+    import httpx
+    monkeypatch.setattr(httpx, "get", mock_get)
+
+    # Test Ollama Ready status
+    client = LLMClient(api_key="", ollama_model="llama3.1")
+    assert client.fallback_available
+    assert client.fallback_status == "Ready"
+    assert client.fallback_error is None
+
+    # Test Ollama Degraded status
+    calls.clear()
+    monkeypatch.setattr(httpx, "get", lambda url, timeout=None: MockResponseDegraded())
+    client2 = LLMClient(api_key="", ollama_model="llama3.1")
+    assert client2.fallback_available
+    assert client2.fallback_status == "Degraded"
+
+    # Test Ollama Offline status
+    def mock_get_fail(url, timeout=None):
+        raise Exception("Connection Refused")
+    monkeypatch.setattr(httpx, "get", mock_get_fail)
+    client3 = LLMClient(api_key="")
+    assert not client3.fallback_available
+    assert client3.fallback_status == "Offline"
+    assert "Connection Refused" in client3.fallback_error
+
 
 

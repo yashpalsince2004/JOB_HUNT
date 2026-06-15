@@ -119,7 +119,7 @@ class SmartRecruitersScraper(BaseScraper):
             # Pagination
             total_found = data.get("totalFound", 0)
             offset += limit
-            if offset >= total_found or (max_jobs is not None and len(all_jobs) >= max_jobs):
+            if offset >= 300 or offset >= total_found or (max_jobs is not None and len(all_jobs) >= max_jobs):
                 break
             self._polite_delay(0.5, 1.0)
 
